@@ -1,14 +1,15 @@
 ﻿body {
     min-height: 100vh;
-    background: linear-gradient(135deg, #6264a7, #464eb8);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: "Segoe Fluent Icons";
+    background: url('../Contents/Images/Loginbg.png') no-repeat center center;
+    background-size:cover;
 }
 .login-card {
     width: 100%;
-    max-width: 380px;
+    min-width: 380px;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -16,8 +17,9 @@
 }
 .login-logo {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: bold;
     color: #5b5fc7;
+    font-family:'Sans Serif Collection';
 }
 .btn-teams {
     background-color: #6264a7;

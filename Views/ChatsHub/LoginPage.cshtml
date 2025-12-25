@@ -1,34 +1,31 @@
 ﻿@{
-    Layout = null;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Login";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChatsHub - Login</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/LoginPage.css" />
-</head>
-<body class="d-flex align-items-center justify-content-center vh-100">
+
+<div class="d-flex align-items-center justify-content-center vh-100">
     <div class="login-card">
+
         <div class="text-center mb-4">
-            <div class="login-logo">ChatsHub</div>
+            <div class="login-logo text-nowrap bd-highlight">ChatsHub</div>
         </div>
+
         <form method="post">
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" placeholder="Enter your email" id="username" name="username" required />
+                <input type="email" class="form-control" placeholder="Enter your email" id="email" name="email" autocomplete="username" required />
             </div>
+
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" placeholder="Enter your password" id="password" name="password" required />
+                <input type="password" class="form-control" placeholder="Enter your password" id="password" name="password" autocomplete="current-password" required />
             </div>
-            <button type="submit" class="btn btn-teams w-100">Login</button>
+
+            <button type="submit" class="btn btn-teams w-100 btn-primary">Login</button>
+
             <div class="text-center mt-3">
                 <a href="#" class="text-decoration-none" style="color:#5b5fc7">Can’t access your account?</a>
             </div>
         </form>
     </div>
-</body>
-</html>
+</div>
