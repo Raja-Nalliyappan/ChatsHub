@@ -1,0 +1,132 @@
+﻿body {
+    background: #f5f5f5;
+}
+
+.search-input {
+    border: none;
+    color: #fff;
+    padding-left: 40px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+}
+
+.avatar-img {
+    width: 32px;
+    height: 32px;
+}
+
+.main-wrapper {
+    height: calc(100vh - 56px);
+}
+
+/* APP BAR */
+.app-bar {
+    width: 60px;
+    background: #f3f2f1;
+}
+
+/* CHAT LIST */
+.chat-list {
+    width: 280px;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+/* CHAT ITEM */
+.chat-item {
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+    .chat-item.active,
+    .chat-item:hover {
+        background: #e8ebfa;
+    }
+
+/* CHAT AREA */
+.chat-area {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ddd;
+}
+
+/* MESSAGES */
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #fafafa;
+}
+
+.msg {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    max-width: 50%;
+}
+
+.msg-left {
+    background: #fff;
+    border: 1px solid #ddd;
+    margin-right: auto;
+    width:fit-content;
+}
+
+.msg-right {
+    background: #eef1fb;
+    border: 1px solid #ddd;
+    margin-left: auto;
+    width: fit-content;
+}
+
+/* INPUT */
+.chat-input {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+}
+
+/* INFO PANEL */
+.info-panel {
+    width: 250px;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    padding: 15px;
+}
+
+/* AVATAR */
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #d0d4f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+.chat-area {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.messages {
+    flex: 1 1 auto; /* Take remaining space */
+    overflow-y: auto; /* Scroll if messages overflow */
+    padding-bottom: 10px; /* Avoid overlap with input */
+}
+
+.chat-input {
+    flex: 0 0 auto; /* Always stay at bottom */
+    background: #fff;
+}

@@ -1,3 +1,5 @@
+wwwroot\Contents\Images\Loginbg.png
+wwwroot\css\Index.css
 wwwroot\css\LoginPage.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
@@ -59,3 +61,4 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\js\Messages.js

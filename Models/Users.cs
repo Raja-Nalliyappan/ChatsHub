@@ -10,6 +10,6 @@
         public string Role { get; set; } = null!;
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? LastUpdatedAt { get; set; }
+        public DateTime LastLoginAt { get; set; }
     }
 }
