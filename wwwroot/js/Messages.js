@@ -11,7 +11,7 @@ function showError(message, error) {
 // Load chat list (existing chats)
 async function loadChatList() {
     try {
-        const res = await fetch('/GetChatUsers');
+        const res = await fetch('/ChatsHub/GetChatUsers');
 
         if (!res.ok) {
             throw new Error(`Failed to load users. Status: ${res.status}`);
@@ -29,8 +29,11 @@ async function loadChatList() {
             div.dataset.userName = user.name;
             div.innerHTML = `
                 <strong>${user.name}</strong><br>
-                <small class="text-muted">${user.lastLoginAt ?? ""}</small>
-            `;
+                <small class="text-muted">
+                    ${ user.lastLoginAt ? formatTimes(user.lastLoginAt) : "" }
+                </small >`;
+
+
             chatList.appendChild(div);
         });
 
@@ -60,7 +63,7 @@ async function loadMessages() {
             <small class="text-muted">Chat</small>
         `;
 
-        const res = await fetch(`/GetMessages?otherUserId=${SELECTED_USER_ID}`);
+        const res = await fetch(`/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`);
 
         if (!res.ok) {
             throw new Error(`Failed to load messages. Status: ${res.status}`);
@@ -80,7 +83,7 @@ async function loadMessages() {
             div.innerHTML = `
                 ${m.massage}<br>
                 <small class="text-muted">
-                    ${new Date(m.createAt).toLocaleTimeString()}
+                    ${formatTimes(m.createAt)}
                 </small>
             `;
 
@@ -99,15 +102,16 @@ document.getElementById("sendBtn").addEventListener("click", async function () {
     const input = document.getElementById("messageInput");
     const message = input.value.trim();
 
-    if (!message || !SELECTED_USER_ID) return;
+    if (!message || !SELECTED_USER_ID || !SELECTED_USER_NAME) return;
 
     try {
-        const res = await fetch('/SendMessage', {
+        const res = await fetch('/ChatsHub/SendMessage', {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: `receiverId=${SELECTED_USER_ID}&message=${encodeURIComponent(message)}`
+            },       
+            body: `receiverId=${SELECTED_USER_ID}&message=${encodeURIComponent(message)}&messagereceivername=${encodeURIComponent(SELECTED_USER_NAME)}`
+
         });
 
         if (!res.ok) {
@@ -127,6 +131,7 @@ document.getElementById("sendBtn").addEventListener("click", async function () {
 function selectUser(userId, userName) {
     try {
         SELECTED_USER_ID = userId;
+        SELECTED_USER_NAME = userName;
 
         document.getElementById("chatHeaderUser").innerHTML = `
             <strong>${userName}</strong><br>
@@ -217,3 +222,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         showError("Application failed to initialize", error);
     }
 });
+
+
+
+

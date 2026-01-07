@@ -80,3 +80,6 @@ R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\runtimes\win\lib\net8.0\System
 R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 R:\Edgar ChatsHub\Edgar\ChatsHub\obj\Debug\net8.0\ChatsHub.csproj.AssemblyReference.cache
 R:\Edgar ChatsHub\Edgar\ChatsHub\obj\Debug\net8.0\ChatsHub.csproj.Up2Date
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Npgsql.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll

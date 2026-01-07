@@ -16,11 +16,20 @@
         height: 100%;
         margin: 0;
        }
+
+       /* Toast  */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
     </style>
 
 </head>
 <body>
     @RenderBody()
+    <div id="toastContainer"></div>
     
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

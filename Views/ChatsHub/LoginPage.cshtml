@@ -5,6 +5,10 @@
 @section Styles{
     <link rel="stylesheet" href="~/css/LoginPage.css" />
 }
+@section Scripts{
+    <script src="~/js/Login.js"></script>
+    <script src="~/js/Common.js"></script>
+}
 
 <div class="d-flex align-items-center justify-content-center vh-100">
     <div class="login-card">
@@ -24,7 +28,7 @@
                 <input type="password" class="form-control" placeholder="Enter your password" id="password" name="password" autocomplete="current-password" required />
             </div>
 
-            <button type="submit" class="btn btn-teams w-100 btn-primary">Login</button>
+            <button id="loginUsers" type="submit" class="btn btn-teams w-100 btn-primary">Login</button>
 
             <div class="text-center mt-3">
                 <a href="#" class="text-decoration-none" style="color:#5b5fc7">Can’t access your account?</a>
