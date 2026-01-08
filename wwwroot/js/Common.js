@@ -19,6 +19,8 @@ function formatTimes(dateValue) {
 
 
 
+
+
 //Toast Message
 function showToast(message, type) {
     const toastEl = document.createElement('div');
@@ -43,3 +45,36 @@ function showToast(message, type) {
         toastEl.remove();
     });
 }
+
+
+
+
+
+
+//Loader
+(function () {
+    function createLoader() {
+        if (document.getElementById("pageLoader")) return;
+
+        const loader = document.createElement("div");
+        loader.id = "pageLoader";
+        loader.innerHTML = `
+      <div class="loader">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+        document.body.appendChild(loader);
+    }
+
+    window.showLoader = function () {
+        createLoader();
+        document.getElementById("pageLoader").style.display = "flex";
+    };
+
+    window.hideLoader = function () {
+        const loader = document.getElementById("pageLoader");
+        if (loader) loader.style.display = "none";
+    };
+})();

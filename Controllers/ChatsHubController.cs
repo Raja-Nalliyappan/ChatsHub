@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatsHub.Controllers
 {
-    [Route("[controller]")]
+    [Route("chatsHub")]
     public class ChatsHubController : Controller
     {
         private readonly IUsersRepository _usersRepository;
@@ -16,7 +16,13 @@ namespace ChatsHub.Controllers
             _jwtTokenService = jwtTokenService;
         }
 
-        [HttpGet("Dashboard")]
+        [HttpGet("/")]
+        public IActionResult Root()
+        {
+            return Redirect("/chatsHub/login");
+        }
+
+        [HttpGet("dashboard")]
         public IActionResult Index()
         {
             int currentUserId = 1;
@@ -45,8 +51,8 @@ namespace ChatsHub.Controllers
             return Ok();
         }
 
-        [HttpGet("")]
-        [Route("/")]
+        
+        [HttpGet("login")]
         public IActionResult LoginPage()
         {
             return View();
