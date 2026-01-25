@@ -142,10 +142,19 @@ function selectUser(userId, userName) {
 
 
 // SignalR connection
+const token = localStorage.getItem("token"); // save token after login
+
+if (!token) {
+    alert("User not logged in. Token missing.");
+}
+
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/chatHub") // Hub URL must match server
+    .withUrl("/chatHub", {
+        accessTokenFactory: () => token
+    })
     .withAutomaticReconnect()
     .build();
+
 
 connection.start()
     .then(() => {
@@ -154,6 +163,8 @@ connection.start()
     .catch(err => {
         console.error("SignalR connection failed:", err);
     });
+
+
 
 // Receive messages
 connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt) => {

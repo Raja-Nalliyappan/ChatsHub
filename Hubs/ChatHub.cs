@@ -1,53 +1,61 @@
 ﻿using ChatsHub.Models;
 using ChatsHub.Repository.Interface;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 public class ChatHub : Hub
 {
+    private int? GetUserId()
+    {
+        var userIdClaim = Context.User?.FindFirst(ClaimTypes.NameIdentifier);
+        return userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+    }
+
+    private string GetUserName()
+    {
+        return Context.User?.Identity?.Name ?? "Unknown";
+    }
+
     public override async Task OnConnectedAsync()
     {
-        var httpContext = Context.GetHttpContext();
-        int? userId = httpContext?.Session.GetInt32("UserId");
-
-        // Fallback: query string for WebSocket connections
-        if (!userId.HasValue && httpContext?.Request.Query["userId"].Count > 0)
-        {
-            if (int.TryParse(httpContext.Request.Query["userId"], out int qsUserId))
-                userId = qsUserId;
-        }
+        var userId = GetUserId();
 
         if (userId.HasValue)
         {
-            Console.WriteLine($"User {userId.Value} connected: {Context.ConnectionId}");
             await Groups.AddToGroupAsync(Context.ConnectionId, userId.Value.ToString());
+            Console.WriteLine($"User {userId.Value} connected");
         }
 
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var httpContext = Context.GetHttpContext();
-        int? userId = httpContext?.Session.GetInt32("UserId");
+        var userId = GetUserId();
 
         if (userId.HasValue)
+        {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.Value.ToString());
+        }
 
         await base.OnDisconnectedAsync(exception);
     }
 
     public async Task SendMessage(string message, int receiverId)
     {
-        var httpContext = Context.GetHttpContext();
-        int? senderId = httpContext?.Session.GetInt32("UserId");
-        string senderName = httpContext?.Session.GetString("UserName") ?? "Unknown";
+        var senderId = GetUserId();
+        var senderName = GetUserName();
 
-        if (!senderId.HasValue || string.IsNullOrWhiteSpace(message)) return;
+        if (!senderId.HasValue || string.IsNullOrWhiteSpace(message))
+            return;
 
         var createdAt = DateTime.Now;
 
-        // ----- INSERT INTO DATABASE -----
-        var usersRepo = httpContext.RequestServices.GetService<IUsersRepository>();
+        var usersRepo = Context.GetHttpContext()
+            ?.RequestServices
+            .GetRequiredService<IUsersRepository>();
+
         var receiver = usersRepo.GetAllUsers().FirstOrDefault(u => u.Id == receiverId);
 
         usersRepo.InsertMessage(new Messages
@@ -59,22 +67,10 @@ public class ChatHub : Hub
             CreateAt = createdAt
         });
 
-        // ----- SEND TO RECEIVER -----
         await Clients.Group(receiverId.ToString())
             .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt);
 
-        // Echo to sender
         await Clients.Group(senderId.Value.ToString())
             .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt);
-
-        // Notification
-        await Clients.Group(receiverId.ToString())
-            .SendAsync("ReceiveNotification", new
-            {
-                FromUserId = senderId.Value,
-                FromUserName = senderName,
-                Message = message,
-                Time = createdAt
-            });
     }
 }

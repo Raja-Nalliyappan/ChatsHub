@@ -1,7 +1,10 @@
 ﻿$("#loginUsers").click(function (e) {
     e.preventDefault();
 
-    var data = { Email: $("#email").val(), PasswordHash: $("#password").val() };
+    var data = {
+        Email: $("#email").val(),
+        PasswordHash: $("#password").val()
+    };
 
     $.ajax({
         type: "POST",
@@ -10,15 +13,18 @@
         data: JSON.stringify(data),
         dataType: "json",
         beforeSend: function () {
-            showLoader()
+            showLoader();
         },
-
         success: function (res) {
             if (res.success) {
-                showToast(res.message, 'success')
+                showToast(res.message, 'success');
+
+                // ✅ SAVE TOKEN CORRECTLY
+                localStorage.setItem("token", res.token);
+
                 setTimeout(function () {
-                    window.location.href = "/chatsHub/dashboard"
-                },1000)
+                    window.location.href = "/chatsHub/dashboard";
+                }, 1000);
             } else {
                 showToast(res.message, 'danger');
             }
@@ -31,17 +37,20 @@
             }
         },
         complete: function () {
-            hideLoader()
+            hideLoader();
         }
     });
 });
 
 
 
-//Logout
+
 function logout() {
-    showLoader()
+    showLoader();
+
+    localStorage.removeItem("token"); // ✅ clear JWT
+
     setTimeout(function () {
-        window.location.href = "/chatshub/login"
+        window.location.href = "/chatsHub/login";
     }, 800);
 }
