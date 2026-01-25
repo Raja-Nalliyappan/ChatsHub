@@ -1,9 +1,11 @@
 ﻿using ChatsHub.Models;
 using ChatsHub.Repository.Interface;
 using ChatsHub.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Linq;
+using System.Security.Claims;
 
 [Route("chatsHub")]
 public class ChatsHubController : Controller
@@ -36,19 +38,32 @@ public class ChatsHubController : Controller
         return View(users);
     }
 
+    [Authorize]
     [HttpGet("GetChatUsers")]
     public IActionResult GetChatUsers()
     {
-        int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        int currentUserId = int.Parse(userIdClaim.Value);
+
         var users = _usersRepository.GetChatUsers(currentUserId);
         return Json(users);
     }
 
+    [Authorize]
     [HttpGet("GetMessages")]
     public IActionResult GetMessages(int otherUserId)
     {
-        int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
-        var messages = _usersRepository.GetMessages(currentUserId, otherUserId)
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        int currentUserId = int.Parse(userIdClaim.Value);
+
+        var messages = _usersRepository
+            .GetMessages(currentUserId, otherUserId)
             .OrderBy(m => m.CreateAt)
             .Select(m => new
             {
@@ -58,6 +73,7 @@ public class ChatsHubController : Controller
                 m.Message,
                 m.CreateAt
             });
+
         return Json(messages);
     }
 

@@ -25,7 +25,14 @@ function showError(msg, err) {
 async function loadChatList() {
     try {
         // Fetch users who we have chat conversations with
-        const response = await fetch('/ChatsHub/GetChatUsers');
+        const token = localStorage.getItem("token");
+
+        const response = await fetch('/ChatsHub/GetChatUsers', {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
         let users = await response.json();
 
         const chatList = document.getElementById("chatList");
@@ -77,8 +84,19 @@ async function loadMessages() {
     }
 
     try {
+        const token = localStorage.getItem("token"); // <-- add this here
+        if (!token) {
+            showError("User not logged in", "Token missing");
+            return;
+        }
+
         const url = `/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`;
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
         const messages = await response.json();
 
         const container = document.getElementById("messagesContainer");
