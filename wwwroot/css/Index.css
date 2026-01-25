@@ -130,3 +130,12 @@
     flex: 0 0 auto; /* Always stay at bottom */
     background: #fff;
 }
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+}

@@ -1,5 +1,11 @@
+wwwroot\Contents\Images\Loginbg.png
+wwwroot\css\Common.css
+wwwroot\css\Index.css
+wwwroot\css\LoginPage.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\js\Common.js
+wwwroot\js\Login.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -58,10 +64,4 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\Contents\Images\Loginbg.png
-wwwroot\css\LoginPage.css
-wwwroot\css\Index.css
 wwwroot\js\Messages.js
-wwwroot\css\Common.css
-wwwroot\js\Login.js
-wwwroot\js\Common.js

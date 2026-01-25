@@ -83,3 +83,8 @@ R:\Edgar ChatsHub\Edgar\ChatsHub\obj\Debug\net8.0\ChatsHub.csproj.Up2Date
 R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Npgsql.dll
 R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\Newtonsoft.Json.dll
+R:\Edgar ChatsHub\Edgar\ChatsHub\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll

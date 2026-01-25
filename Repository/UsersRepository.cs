@@ -40,18 +40,29 @@ namespace ChatsHub.Repository
             return _dbConnection.QueryFirstOrDefault<Users>(loginUser, new { Email = email, PasswordHash = password });
         }
 
-        public void InsertMessage(int senderId, int receiverId, string message , string messagereceivername)
+        public void InsertMessage(Messages msg)
         {
-            _dbConnection.Execute("SELECT \"InsertMessage\"(@SenderId, @ReceiverId, @Message, @MessageReceiverName)",
-            new
-            {
-                SenderId = senderId,
-                ReceiverId = receiverId,
-                Message = message,
-                MessageReceiverName = messagereceivername
-            }
-);
+            // Ensure connection is open
+            if (_dbConnection.State != ConnectionState.Open)
+                _dbConnection.Open();
 
+            string sql = @"
+        INSERT INTO ""Messages"" 
+            (""SenderId"", ""ReceiverId"", ""Message"", ""MessageReceiverName"", ""CreateAt"")
+        VALUES 
+            (@SenderId, @ReceiverId, @Message, @MessageReceiverName, @CreateAt);
+    ";
+
+            _dbConnection.Execute(sql, new
+            {
+                SenderId = msg.SenderId,
+                ReceiverId = msg.ReceiverId,
+                Message = msg.Message,
+                MessageReceiverName = msg.MessageReceiverName ?? "",
+                CreateAt = msg.CreateAt
+            });
         }
+
+
     }
 }

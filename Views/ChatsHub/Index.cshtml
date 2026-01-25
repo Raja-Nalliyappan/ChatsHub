@@ -9,11 +9,10 @@
     <link rel="stylesheet" href="~/css/Index.css" />
 }
 
-@section Scripts {
-    <script src="~/js/Messages.js"></script>
-    <script src="~/js/Common.js"></script>
-    <script src="~/js/Login.js"></script>
-}
+<!-- Hidden fields for SignalR JS -->
+<input type="hidden" id="currentUserId" value="@Context.Session.GetInt32("UserId")" />
+<input type="hidden" id="currentUserName" value="@ViewBag.UserName" />
+
 <!-- TOP HEADER -->
 <nav class="navbar px-3">
     <div class="d-flex align-items-center gap-3">
@@ -30,7 +29,9 @@
                id="searchInput"
                class="form-control search-input"
                placeholder="Search...">
-        <div id="searchResults" class="position-absolute bg-white border w-100" style="z-index: 1000;"></div>
+        <div id="searchResults"
+             class="position-absolute bg-white border w-100"
+             style="top:110%; left:0; z-index:1000;"></div>
     </div>
 
     <div class="d-flex align-items-center gap-3">
@@ -42,12 +43,16 @@
 
             <ul class="dropdown-menu dropdown-menu-end shadow">
                 <li class="px-3 py-2">
-                    <strong>Raja N</strong><br />
-                    <small class="text-muted">raja@company.com</small>
+                    <strong>@ViewBag.UserName</strong><br />
+                    <small class="text-muted">@ViewBag.UserEmail</small>
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item"><i class="bi bi-person me-2"></i> Profile</a></li>
-                <li><a class="dropdown-item text-danger" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                <li>
+                    <a class="dropdown-item text-danger" onclick="logout()">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -63,7 +68,7 @@
 
     <!-- CHAT LIST -->
     <div class="chat-list p-3" id="chatList">
-        <strong>Chat</strong>
+        <strong>Chats</strong>
     </div>
 
     <!-- CHAT AREA -->
@@ -72,7 +77,7 @@
         <!-- HEADER -->
         <div class="border-bottom p-3 d-flex justify-content-between align-items-center" id="chatHeader">
             <div id="chatHeaderUser">
-                <strong>BX Handover status</strong><br>
+                <strong>Select a user</strong><br>
                 <small class="text-muted">Chat</small>
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -84,7 +89,7 @@
 
         <!-- MESSAGES CONTAINER -->
         <div id="messagesContainer" class="messages flex-fill overflow-auto p-3">
-            <!-- messages load dynamically here -->
+            <!-- Messages load dynamically -->
         </div>
 
         <!-- CHAT INPUT -->
@@ -92,19 +97,38 @@
             <input type="text" id="messageInput" class="form-control shadow-none bg-light" placeholder="Type a message">
             <i class="bi bi-paperclip fs-5"></i>
             <i class="bi bi-emoji-smile fs-5"></i>
-            <button id="sendBtn" class="btn btn-primary"><i class="bi bi-send"></i></button>
+            <button id="sendBtn" class="btn btn-primary">
+                <i class="bi bi-send"></i>
+            </button>
         </div>
     </div>
 
     <!-- USER INFO PANEL -->
-    <div class="info-panel">
+    <div class="info-panel p-2">
         <h6>ChatsHub - User List</h6>
+
         @foreach (var user in Model)
         {
-            <strong class="user-item" data-user-id="@user.Id" data-user-name="@user.Name">@user.Name</strong>
-        
-            <br />
+            <div class="user-item mt-2 p-1"
+                 data-user-id="@user.Id"
+                 data-user-name="@user.Name"
+                 style="cursor:pointer;">
+                <strong>@user.Name</strong>
+            </div>
         }
     </div>
 
 </div>
+
+@section Scripts {
+
+    <!-- SignalR Library (IMPORTANT) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <!-- Chat JS (SignalR + AJAX) -->
+    <script src="~/js/Messages.js"></script>
+
+    <!-- Other JS -->
+    <script src="~/js/Common.js"></script>
+    <script src="~/js/Login.js"></script>
+}

@@ -1,164 +1,313 @@
-﻿// Global Variables
-const CURRENT_USER_ID = 1;
-let SELECTED_USER_ID = null;
+﻿// Global variables
+const CURRENT_USER_ID = parseInt(document.getElementById("currentUserId").value, 10);
 
-// Global Error Handler
-function showError(message, error) {
-    console.error(message, error);
-    alert(message); // Replace with toast later if needed
+let SELECTED_USER_ID = null;
+let SELECTED_USER_NAME = null;
+
+// Utility functions
+
+// Format a date string into a readable format
+function formatTime(dateStr) {
+    if (!dateStr) {
+        return "";
+    }
+    const date = new Date(dateStr);
+    return date.toLocaleString();
 }
 
-// Load chat list (existing chats)
+// Show an error message in console and alert
+function showError(msg, err) {
+    console.error(msg, err);
+    alert(msg);
+}
+
+// Load chat list
 async function loadChatList() {
     try {
-        const res = await fetch('/ChatsHub/GetChatUsers');
+        // Fetch users who we have chat conversations with
+        const response = await fetch('/ChatsHub/GetChatUsers');
+        let users = await response.json();
 
-        if (!res.ok) {
-            throw new Error(`Failed to load users. Status: ${res.status}`);
-        }
-
-        const users = await res.json();
         const chatList = document.getElementById("chatList");
 
-        chatList.innerHTML = "<strong>Chat</strong>";
+        // Clear chat list and add header
+        chatList.innerHTML = "<strong>Chats</strong>";
 
-        users.forEach(user => {
-            const div = document.createElement("div");
-            div.className = "chat-item mt-3";
-            div.dataset.userId = user.id;
-            div.dataset.userName = user.name;
-            div.innerHTML = `
-                <strong>${user.name}</strong><br>
-                <small class="text-muted">
-                    ${ user.lastLoginAt ? formatTimes(user.lastLoginAt) : "" }
-                </small >`;
-
-
-            chatList.appendChild(div);
+        // Sort users so that the user with the latest message comes first
+        // Assuming your backend returns 'lastMessageAt' field for sorting
+        users.sort((a, b) => {
+            const dateA = new Date(a.lastMessageAt || 0);
+            const dateB = new Date(b.lastMessageAt || 0);
+            return dateB - dateA; // latest first
         });
 
-    } catch (error) {
-        showError("Unable to load chat list", error);
+        // Track the first user to select by default
+        let firstUser = null;
+
+        // Add each user to the chat list
+        users.forEach((user, index) => {
+            const chatItem = document.createElement("div");
+
+            chatItem.className = "chat-item mt-3";
+            chatItem.dataset.userId = user.id;
+            chatItem.dataset.userName = user.name;
+            chatItem.innerHTML = `<strong>${user.name}</strong>`;
+
+            chatList.appendChild(chatItem);
+
+            // Pick first user to select by default
+            if (index === 0) firstUser = user;
+        });
+
+        // Automatically select the latest user
+        if (firstUser) {
+            selectUser(firstUser.id, firstUser.name);
+        }
+
+    } catch (err) {
+        showError("Unable to load chat list", err);
     }
 }
 
-// Load messages for selected user
+
+// Load messages
 async function loadMessages() {
-    if (!SELECTED_USER_ID) return;
+    if (!SELECTED_USER_ID) {
+        return; // Do nothing if no user is selected
+    }
 
     try {
-        const chatItem = document.querySelector(
-            `#chatList .chat-item[data-user-id='${SELECTED_USER_ID}']`
-        );
+        const url = `/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`;
+        const response = await fetch(url);
+        const messages = await response.json();
 
-        const userItem = document.querySelector(
-            `.user-item[data-user-id='${SELECTED_USER_ID}']`
-        );
-
-        const selectedUserName =
-            (chatItem || userItem)?.dataset.userName || "";
-
-        document.getElementById("chatHeaderUser").innerHTML = `
-            <strong>${selectedUserName}</strong><br>
-            <small class="text-muted">Chat</small>
-        `;
-
-        const res = await fetch(`/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`);
-
-        if (!res.ok) {
-            throw new Error(`Failed to load messages. Status: ${res.status}`);
-        }
-
-        const messages = await res.json();
         const container = document.getElementById("messagesContainer");
+
+        // Clear previous messages
         container.innerHTML = "";
 
-        messages.forEach(m => {
-            const div = document.createElement("div");
-            div.className =
-                m.senderId == CURRENT_USER_ID
-                    ? "msg msg-right"
-                    : "msg msg-left";
+        // Append each message
+        messages.forEach(message => {
+            const msgDiv = document.createElement("div");
 
-            div.innerHTML = `
-                ${m.massage}<br>
-                <small class="text-muted">
-                    ${formatTimes(m.createAt)}
-                </small>
+            if (message.senderId === CURRENT_USER_ID) {
+                msgDiv.className = "msg msg-right"; // Outgoing message
+            } else {
+                msgDiv.className = "msg msg-left"; // Incoming message
+            }
+
+            msgDiv.innerHTML = `
+                <strong>${message.senderId === CURRENT_USER_ID ? "You" : SELECTED_USER_NAME}</strong><br>
+                ${message.message}<br>
+                <small>${formatTime(message.createAt)}</small>
             `;
 
-            container.appendChild(div);
+            container.appendChild(msgDiv);
         });
 
-        container.scrollTop = container.scrollHeight;
+        // Scroll to the bottom
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+        });
 
-    } catch (error) {
-        showError("Unable to load messages", error);
+    } catch (err) {
+        showError("Unable to load messages", err);
     }
 }
 
-// Send message
-document.getElementById("sendBtn").addEventListener("click", async function () {
-    const input = document.getElementById("messageInput");
-    const message = input.value.trim();
+/// Select user to chat with
+function selectUser(userId, userName) {
+    SELECTED_USER_ID = parseInt(userId, 10);
+    SELECTED_USER_NAME = userName;
 
-    if (!message || !SELECTED_USER_ID || !SELECTED_USER_NAME) return;
+    const chatHeader = document.getElementById("chatHeaderUser");
+    chatHeader.innerHTML = `
+        <strong>${userName}</strong><br>
+        <small>Chat</small>
+    `;
 
-    try {
-        const res = await fetch('/ChatsHub/SendMessage', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },       
-            body: `receiverId=${SELECTED_USER_ID}&message=${encodeURIComponent(message)}&messagereceivername=${encodeURIComponent(SELECTED_USER_NAME)}`
-
-        });
-
-        if (!res.ok) {
-            throw new Error(`Message send failed. Status: ${res.status}`);
+    // Remove unread dot for this user
+    const chatItem = document.querySelector(`.chat-item[data-user-id="${SELECTED_USER_ID}"]`);
+    if (chatItem) {
+        const dot = chatItem.querySelector(".unread-dot");
+        if (dot) {
+            dot.remove();
         }
+    }
 
-        input.value = "";
-        await loadMessages();
-        await loadChatList();
+    // Load messages with the selected user
+    loadMessages();
+}
 
-    } catch (error) {
-        showError("Unable to send message", error);
+
+// SignalR connection
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/chatHub") // Hub URL must match server
+    .withAutomaticReconnect()
+    .build();
+
+connection.start()
+    .then(() => {
+        console.log("SignalR connected");
+    })
+    .catch(err => {
+        console.error("SignalR connection failed:", err);
+    });
+
+// Receive messages
+connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt) => {
+    const container = document.getElementById("messagesContainer");
+    const isCurrentChat =
+        (senderId === SELECTED_USER_ID && receiverId === CURRENT_USER_ID) ||
+        (senderId === CURRENT_USER_ID && receiverId === SELECTED_USER_ID);
+
+    // Append message if it's for the current chat
+    if (isCurrentChat) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = senderId === CURRENT_USER_ID ? "msg msg-right" : "msg msg-left";
+        msgDiv.innerHTML = `
+            <strong>${senderId === CURRENT_USER_ID ? "You" : senderName}</strong><br>
+            ${message}<br>
+            <small>${formatTime(createAt)}</small>
+        `;
+        container.appendChild(msgDiv);
+
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+        });
+    }
+
+    // ===== Move user to top of chat list =====
+    const userId = senderId === CURRENT_USER_ID ? receiverId : senderId; // the other user
+    const chatList = document.getElementById("chatList");
+    const chatItem = chatList.querySelector(`.chat-item[data-user-id="${userId}"]`);
+
+    if (chatItem) {
+        // Remove existing and re-add at top
+        chatItem.remove();
+        chatList.insertBefore(chatItem, chatList.children[1]); // after <strong>Chats</strong>
+    } else {
+        // If user is not yet in the list, optionally add them
+        const newChatItem = document.createElement("div");
+        newChatItem.className = "chat-item mt-3";
+        newChatItem.dataset.userId = userId;
+        newChatItem.dataset.userName = senderName;
+        newChatItem.innerHTML = `<strong>${senderName}</strong>`;
+        chatList.insertBefore(newChatItem, chatList.children[1]);
+    }
+
+    // Add unread dot if message is from another user and not currently selected
+    if (!isCurrentChat && chatItem && !chatItem.querySelector(".unread-dot")) {
+        const dot = document.createElement("span");
+        dot.className = "unread-dot";
+        chatItem.appendChild(dot);
     }
 });
 
-// Select user
-function selectUser(userId, userName) {
+
+// Receive notifications
+connection.on("ReceiveNotification", notification => {
+    // Adjust property names to match backend JSON
+    const fromUserId = notification.fromUserId ?? notification.FromUserId;
+    const fromUserName = notification.fromUserName ?? notification.FromUserName;
+    const message = notification.message ?? notification.Message;
+
+    // Skip if current chat is open
+    if (SELECTED_USER_ID === fromUserId) {
+        return;
+    }
+
+    const chatItem = document.querySelector(`.chat-item[data-user-id="${fromUserId}"]`);
+
+    if (chatItem && !chatItem.querySelector(".unread-dot")) {
+        const dot = document.createElement("span");
+        dot.className = "unread-dot";
+        chatItem.appendChild(dot);
+    }
+
+    // Play notification sound
+    new Audio('/sounds/notification.mp3').play();
+
+    // Show browser notification
+    if ("Notification" in window && Notification.permission === "granted") {
+        const notif = new Notification(fromUserName, {
+            body: message,
+            icon: '/images/chat-icon.png',
+            tag: `chat-${fromUserId}`,
+            renotify: true
+        });
+
+        notif.onclick = (e) => {
+            e.preventDefault();
+            window.focus();
+            selectUser(fromUserId, fromUserName);
+            notif.close();
+        };
+    }
+});
+
+
+// Send message
+async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const message = input.value.trim();
+
+    if (!message) {
+        alert("Type a message");
+        return;
+    }
+
+    if (!SELECTED_USER_ID) {
+        alert("Select a user first");
+        return;
+    }
+
+    if (connection.state !== signalR.HubConnectionState.Connected) {
+        alert("SignalR not connected");
+        return;
+    }
+
     try {
-        SELECTED_USER_ID = userId;
-        SELECTED_USER_NAME = userName;
-
-        document.getElementById("chatHeaderUser").innerHTML = `
-            <strong>${userName}</strong><br>
-            <small class="text-muted">Chat</small>
-        `;
-
-        loadMessages();
-
-        if (!document.querySelector(`#chatList .chat-item[data-user-id='${userId}']`)) {
-            const chatList = document.getElementById("chatList");
-            const div = document.createElement("div");
-
-            div.className = "chat-item mt-3";
-            div.dataset.userId = userId;
-            div.dataset.userName = userName;
-            div.innerHTML = `
-                <strong>${userName}</strong><br>
-                <small class="text-muted"></small>
-            `;
-
-            chatList.appendChild(div);
-        }
-
-    } catch (error) {
-        showError("User selection failed", error);
+        await connection.invoke("SendMessage", message, SELECTED_USER_ID);
+        input.value = ""; // Clear input after sending
+    } catch (err) {
+        showError("Unable to send message", err);
     }
 }
+
+// Event listeners
+
+// Handle chat item clicks
+document.addEventListener("click", (e) => {
+    const chatItem = e.target.closest(".chat-item");
+    if (chatItem) {
+        selectUser(chatItem.dataset.userId, chatItem.dataset.userName);
+    }
+});
+
+// Handle send button click
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
+
+// Handle Enter key in message input
+document.getElementById("messageInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
+
+// Initialization
+document.addEventListener("DOMContentLoaded", () => {
+    // Request notification permission if not granted yet
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+
+    // Load chat list
+    loadChatList();
+});
+
 
 // Click events (chat/user/search)
 document.addEventListener("click", function (e) {
@@ -213,16 +362,3 @@ document.getElementById("searchInput").addEventListener("input", function () {
         showError("Search failed", error);
     }
 });
-
-// Initial load
-document.addEventListener("DOMContentLoaded", async function () {
-    try {
-        await loadChatList();
-    } catch (error) {
-        showError("Application failed to initialize", error);
-    }
-});
-
-
-
-
