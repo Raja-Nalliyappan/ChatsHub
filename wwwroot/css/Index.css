@@ -33,7 +33,7 @@
 
 /* CHAT LIST */
 .chat-list {
-    width: 280px;
+    width: 250px;
     background: #fff;
     border-right: 1px solid #ddd;
     overflow-y: auto;
@@ -41,15 +41,17 @@
 
 /* CHAT ITEM */
 .chat-item {
+    background-color: lavender;
     padding: 8px;
     cursor: pointer;
     border-radius: 6px;
 }
 
-    .chat-item.active,
-    .chat-item:hover {
-        background: #e8ebfa;
-    }
+.chat-item.active,
+.chat-item:hover {
+    background-color:black;
+    color:white;
+}
 
 /* CHAT AREA */
 .chat-area {

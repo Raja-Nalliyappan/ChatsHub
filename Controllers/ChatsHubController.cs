@@ -3,9 +3,7 @@ using ChatsHub.Repository.Interface;
 using ChatsHub.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 [Route("chatsHub")]
 public class ChatsHubController : Controller

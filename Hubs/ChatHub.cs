@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using ChatsHub.Models;
+using ChatsHub.Repository.Interface;
+using Microsoft.AspNetCore.SignalR;
 
 public class ChatHub : Hub
 {
@@ -7,8 +9,8 @@ public class ChatHub : Hub
         var httpContext = Context.GetHttpContext();
         int? userId = httpContext?.Session.GetInt32("UserId");
 
-        // If session doesn't exist, try query string (for WebSockets)
-        if (!userId.HasValue && httpContext?.Request.Query["userId"].Count > 0 == true)
+        // Fallback: query string for WebSocket connections
+        if (!userId.HasValue && httpContext?.Request.Query["userId"].Count > 0)
         {
             if (int.TryParse(httpContext.Request.Query["userId"], out int qsUserId))
                 userId = qsUserId;
@@ -18,10 +20,6 @@ public class ChatHub : Hub
         {
             Console.WriteLine($"User {userId.Value} connected: {Context.ConnectionId}");
             await Groups.AddToGroupAsync(Context.ConnectionId, userId.Value.ToString());
-        }
-        else
-        {
-            Console.WriteLine("No UserId found in session or query string on connection");
         }
 
         await base.OnConnectedAsync();
@@ -44,18 +42,24 @@ public class ChatHub : Hub
         int? senderId = httpContext?.Session.GetInt32("UserId");
         string senderName = httpContext?.Session.GetString("UserName") ?? "Unknown";
 
-        // Fallback to query string if session is null
-        if (!senderId.HasValue && httpContext?.Request.Query["userId"].Count > 0 == true)
-        {
-            if (int.TryParse(httpContext.Request.Query["userId"], out int qsUserId))
-                senderId = qsUserId;
-        }
-
         if (!senderId.HasValue || string.IsNullOrWhiteSpace(message)) return;
 
         var createdAt = DateTime.Now;
 
-        // Send to receiver
+        // ----- INSERT INTO DATABASE -----
+        var usersRepo = httpContext.RequestServices.GetService<IUsersRepository>();
+        var receiver = usersRepo.GetAllUsers().FirstOrDefault(u => u.Id == receiverId);
+
+        usersRepo.InsertMessage(new Messages
+        {
+            SenderId = senderId.Value,
+            ReceiverId = receiverId,
+            Message = message,
+            MessageReceiverName = receiver?.Name ?? "",
+            CreateAt = createdAt
+        });
+
+        // ----- SEND TO RECEIVER -----
         await Clients.Group(receiverId.ToString())
             .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt);
 
