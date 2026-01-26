@@ -218,79 +218,6 @@ connection.start()
         console.error("SignalR connection failed:", err);
     });
 
-// Receive messages
-connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt) => {
-    const container = document.getElementById("messagesContainer");
-    const chatList = document.getElementById("chatList");
-
-    // Determine if the message is for the currently selected chat
-    const isCurrentChat =
-        (senderId === SELECTED_USER_ID && receiverId === CURRENT_USER_ID) ||
-        (senderId === CURRENT_USER_ID && receiverId === SELECTED_USER_ID);
-
-    const msgDate = new Date(createAt).toDateString();
-
-    if (isCurrentChat) {
-        // Check last message date to add separator if day changed
-        const lastMsgDate = container.lastChild?.dataset?.msgDate;
-        if (msgDate !== lastMsgDate) {
-            const separator = document.createElement("div");
-            separator.textContent = formatDateSeparator(createAt);
-            container.appendChild(separator);
-        }
-
-        // Append the message
-        const msgDiv = document.createElement("div");
-        msgDiv.dataset.msgDate = msgDate;
-        msgDiv.innerHTML = `
-            <strong>${senderId === CURRENT_USER_ID ? "You" : senderName}</strong><br>
-            ${message}<br>
-            <small>${formatMessageTime(createAt)}</small>
-        `;
-        container.appendChild(msgDiv);
-
-        // Scroll to bottom
-        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-    } else if (senderId !== CURRENT_USER_ID) {
-        // Add unread dot to chat list item
-        let chatItem = chatList.querySelector(`.chat-item[data-user-id="${senderId}"]`);
-        if (!chatItem) {
-            chatItem = document.createElement("div");
-            chatItem.className = "chat-item mt-3";
-            chatItem.dataset.userId = senderId;
-            chatItem.dataset.userName = senderName;
-            chatItem.innerHTML = `<strong>${senderName}</strong>`;
-            chatList.insertBefore(chatItem, chatList.children[1]);
-        }
-
-        if (!chatItem.querySelector(".unread-dot")) {
-            const dot = document.createElement("span");
-            dot.className = "unread-dot";
-            chatItem.appendChild(dot);
-        }
-
-        // Optional browser notification
-        if (Notification.permission === "granted") {
-            const notif = new Notification(senderName, {
-                body: message,
-                icon: "/path/to/icon.png"
-            });
-            notif.onclick = () => {
-                window.focus();
-                selectUser(senderId, senderName);
-            };
-        }
-    }
-
-    // Move the user to the top of the chat list
-    const userId = senderId === CURRENT_USER_ID ? receiverId : senderId;
-    const chatItem = chatList.querySelector(`.chat-item[data-user-id="${userId}"]`);
-    if (chatItem) {
-        chatItem.remove();
-        chatList.insertBefore(chatItem, chatList.children[1]);
-    }
-});
-
 
 // Send message
 async function sendMessage() {
@@ -312,6 +239,9 @@ async function sendMessage() {
         return;
     }
 
+    const sendButton = document.getElementById("sendBtn");
+    sendButton.disabled = true;  // Disable the button temporarily to prevent multiple clicks
+
     try {
         await connection.invoke("SendMessage", message, SELECTED_USER_ID);
         input.value = ""; // Clear input after sending
@@ -327,11 +257,13 @@ async function sendMessage() {
             chatItem.innerHTML = `<strong>${SELECTED_USER_NAME}</strong>`;
             chatList.insertBefore(chatItem, chatList.children[1]);
         }
-
     } catch (err) {
         showError("Unable to send message", err);
+    } finally {
+        sendButton.disabled = false;  // Re-enable the button
     }
 }
+
 
 // Event listeners
 
@@ -450,14 +382,12 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         }
 
         // Append the actual message
-        const msgDiv = document.createElement("div");
-        msgDiv.dataset.msgDate = msgDate;
-        msgDiv.innerHTML = `
-            <strong>${senderId === CURRENT_USER_ID ? "You" : senderName}</strong><br>
-            ${message}<br>
-            <small>${formatMessageTime(createAt)}</small>
-        `;
-        container.appendChild(msgDiv);
+        renderMessage(container, {
+            senderId,
+            message,
+            createAt
+        });
+
 
         container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
 
@@ -529,4 +459,39 @@ function formatMessageTime(dateStr) {
     }).toUpperCase(); // <-- force AM/PM uppercase
 }
 
+
+
+function renderMessage(container, messageObj) {
+    const msgDate = new Date(messageObj.createAt).toDateString();
+    const isCurrentUser = messageObj.senderId === CURRENT_USER_ID;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.dataset.msgDate = msgDate;
+    msgDiv.style.display = "flex";
+    msgDiv.style.justifyContent = isCurrentUser ? "flex-end" : "flex-start";
+
+    const bubble = document.createElement("div");
+    bubble.style.display = "inline-block";
+    bubble.style.padding = "8px 12px";
+    bubble.style.margin = "5px 0";
+    bubble.style.maxWidth = "70%";
+    bubble.style.borderRadius = "10px";
+    bubble.style.wordWrap = "break-word";
+    bubble.style.backgroundColor = isCurrentUser ? "#0078d7" : "#f3f2f1";
+    bubble.style.color = isCurrentUser ? "#fff" : "#000";
+
+    const text = document.createElement("div");
+    text.textContent = messageObj.message;
+
+    const time = document.createElement("div");
+    time.textContent = formatMessageTime(messageObj.createAt);
+    time.style.fontSize = "0.7em";
+    time.style.textAlign = "right";
+    time.style.opacity = "0.8";
+
+    bubble.appendChild(text);
+    bubble.appendChild(time);
+    msgDiv.appendChild(bubble);
+    container.appendChild(msgDiv);
+}
 
