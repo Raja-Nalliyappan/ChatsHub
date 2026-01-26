@@ -351,27 +351,36 @@ document.addEventListener("click", function (e) {
 });
 
 // Search functionality
-document.getElementById("searchInput").addEventListener("input", function () {
+document.getElementById("searchInput").addEventListener("input", async function () {
     const query = this.value.toLowerCase();
     const resultsContainer = document.getElementById("searchResults");
     resultsContainer.innerHTML = "";
 
     if (!query) return;
 
-    document.querySelectorAll(".chat-item").forEach(user => {
-        const name = user.dataset.userName.toLowerCase();
+    try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/ChatsHub/GetAllUsers", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const users = await response.json();
 
-        if (name.includes(query)) {
-            const div = document.createElement("div");
-            div.className = "search-user-item p-2 border-bottom";
-            div.dataset.userId = user.dataset.userId;
-            div.dataset.userName = user.dataset.userName;
-            div.dataset.userEmail = user.dataset.userEmail || "";
-            div.textContent = user.dataset.userName;
+        users
+            .filter(user => user.name.toLowerCase().includes(query))
+            .forEach(user => {
+                const div = document.createElement("div");
+                div.className = "search-user-item p-2 border-bottom";
+                div.dataset.userId = user.id;
+                div.dataset.userName = user.name;
+                div.dataset.userEmail = user.email || "";
+                div.textContent = user.name;
 
-            resultsContainer.appendChild(div);
-        }
-    });
+                resultsContainer.appendChild(div);
+            });
+
+    } catch (err) {
+        console.error("Search failed:", err);
+    }
 });
 
 

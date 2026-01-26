@@ -99,9 +99,19 @@ public class ChatsHubController : Controller
         return Ok(new
         {
             success = true,
-            message = "Login successful",
+            message = "Login successful ! Welcome back",
             token,
             user = new { user.Id, user.Name, user.Email, user.Role }
         });
     }
+
+    [Authorize]
+    [HttpGet("GetAllUsers")]
+    public IActionResult GetAllUsers()
+    {
+        var allUsers = _usersRepository.GetAllUsers(); // Assuming this returns all users
+        return Json(allUsers);
+    }
+
 }
+
