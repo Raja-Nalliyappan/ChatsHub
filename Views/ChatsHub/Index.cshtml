@@ -63,7 +63,7 @@
 
     <!-- APP BAR -->
     <div class="app-bar d-flex flex-column align-items-center pt-3">
-        <i class="bi bi-chat-dots fs-4 mb-4 text-primary"></i>
+        <img src="https://img.icons8.com/?size=100&id=aIYDmrSk6X13&format=png&color=000000" alt="ChatText" width="35" height="35" class="mt-2" />
     </div>
 
     <!-- CHAT LIST -->
@@ -81,8 +81,8 @@
                 <small class="text-muted">Chat</small>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-camera-video"></i>
-                <i class="bi bi-telephone"></i>
+                @* <i class="bi bi-camera-video"></i> *@
+                @* <i class="bi bi-telephone"></i> *@
                 <i class="bi bi-info-circle"></i>
             </div>
         </div>
@@ -95,28 +95,59 @@
         <!-- CHAT INPUT -->
         <div class="chat-input d-flex align-items-center gap-2 p-2 border-top">
             <input type="text" id="messageInput" class="form-control shadow-none bg-light" placeholder="Type a message">
-            <i class="bi bi-paperclip fs-5"></i>
-            <i class="bi bi-emoji-smile fs-5"></i>
+            @* <i class="bi bi-paperclip fs-5"></i> *@
+            @* <i class="bi bi-emoji-smile fs-5"></i> *@
             <button id="sendBtn" class="btn btn-primary">
                 <i class="bi bi-send"></i>
             </button>
         </div>
     </div>
 
-    <!-- USER INFO PANEL -->
-    <div class="info-panel p-2">
-        <h6>ChatsHub - User List</h6>
-
-        @foreach (var user in Model)
-        {
-            <div class="user-item mt-2 p-1"
-                 data-user-id="@user.Id"
-                 data-user-name="@user.Name"
-                 style="cursor:pointer;">
-                <strong>@user.Name</strong>
+    <!-- USER INFO PANEL - ChatHub Info -->
+    <div id="userInfoPanel" style="width: 260px; min-width: 260px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center;">
+        <p class="fw-bold">ChatsHub User Profile Information</p>
+        <!-- Selected User Info -->
+        <div id="selectedUserInfo" class="d-none">
+            <!-- Letter Avatar -->
+            <div id="infoAvatar"
+                 style="width: 80px; height: 80px; line-height: 80px; border-radius: 50%; background-color: #007bff; color: #fff; font-size: 2rem; margin: 0 auto 15px; font-weight: bold;">
+                <span id="avatarInitial">?</span>
             </div>
-        }
+
+            <!-- User Name -->
+            <div id="infoUserName" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
+                <span id="defaultName">No Name</span>
+            </div>
+
+            <!-- User Email -->
+            <div id="infoUserEmail" style="color: gray; font-size: 0.9rem; word-wrap: break-word;">
+                <span id="defaultEmail">No Email</span>
+            </div>
+
+            <!-- ChatHub Info / Tips -->
+            <div id="chatHubInfo" style="color: #555; font-size: 0.85rem; margin-top: 15px; text-align: left;">
+                <p>💬 Welcome to ChatHub!</p>
+                <p>Here you can:</p>
+                <ul style="padding-left: 18px; margin: 5px 0;">
+                    <li>View your recent chats</li>
+                    <li>Send and receive messages instantly</li>
+                    <li>Search for users to start a conversation</li>
+                </ul>
+                <p style="margin-top: 10px; font-size: 0.8rem; color: gray;">Select a chat to see details and start messaging.</p>
+            </div>
+        </div>
+
+        <!-- No User Selected -->
+        <div id="noUserSelected" style="color: gray; margin-top: 40px;">
+            Select a user to see details
+        </div>
+
     </div>
+
+
+
+
+
 
 </div>
 

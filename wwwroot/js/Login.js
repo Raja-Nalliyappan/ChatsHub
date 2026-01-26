@@ -23,7 +23,7 @@
                 localStorage.setItem("token", res.token);
 
                 setTimeout(function () {
-                    window.location.href = "/chatsHub/dashboard";
+                    window.location.href = "/chatshub/dashboard";
                 }, 1000);
             } else {
                 showToast(res.message, 'danger');
@@ -51,6 +51,6 @@ function logout() {
     localStorage.removeItem("token"); // ✅ clear JWT
 
     setTimeout(function () {
-        window.location.href = "/chatsHub/login";
+        window.location.href = "/chatshub/login";
     }, 800);
 }

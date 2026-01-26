@@ -5,7 +5,6 @@ let SELECTED_USER_ID = null;
 let SELECTED_USER_NAME = null;
 const IST_TIMEZONE = "Asia/Kolkata";
 
-// Utility functions
 
 // Format a date string into a readable format
 function formatTime(dateStr) {
@@ -77,6 +76,7 @@ async function loadChatList() {
             chatItem.className = "chat-item mt-3";
             chatItem.dataset.userId = user.id;
             chatItem.dataset.userName = user.name;
+            chatItem.dataset.userEmail = user.email;
             chatItem.innerHTML = `<strong>${user.name}</strong>`;
 
             chatList.appendChild(chatItem);
@@ -86,7 +86,7 @@ async function loadChatList() {
 
         // Auto-select latest chat
         if (firstUser) {
-            selectUser(firstUser.id, firstUser.name);
+            selectUser(firstUser.id, firstUser.name, firstUser.email);
         }
 
     } catch (err) {
@@ -183,7 +183,7 @@ async function loadMessages() {
 
 
 /// Select user to chat with
-function selectUser(userId, userName) {
+function selectUser(userId, userName, userEmail) {
     SELECTED_USER_ID = parseInt(userId, 10);
     SELECTED_USER_NAME = userName;
 
@@ -195,6 +195,22 @@ function selectUser(userId, userName) {
     if (chatItem) {
         const dot = chatItem.querySelector(".unread-dot");
         if (dot) dot.remove();
+    }
+
+    // ===== USER INFO PANEL =====
+    const infoAvatar = document.getElementById("infoAvatar");
+    const infoUserName = document.getElementById("infoUserName");
+    const selectedUserInfo = document.getElementById("selectedUserInfo");
+    const noUserSelected = document.getElementById("noUserSelected");
+    const infoUserEmail = document.getElementById("infoUserEmail")
+
+    if (infoAvatar && infoUserName) {
+        infoAvatar.innerText = userName.charAt(0).toUpperCase();
+        infoUserName.innerText = userName;
+        infoUserEmail.innerText = userEmail || "";
+
+        selectedUserInfo.classList.remove("d-none");
+        noUserSelected.classList.add("d-none");
     }
 
     document.querySelectorAll(".chat-item").forEach(item => {
@@ -280,7 +296,7 @@ async function sendMessage() {
 document.addEventListener("click", (e) => {
     const chatItem = e.target.closest(".chat-item");
     if (chatItem) {
-        selectUser(chatItem.dataset.userId, chatItem.dataset.userName);
+        selectUser(chatItem.dataset.userId, chatItem.dataset.userName, chatItem.dataset.userEmail);
     }
 });
 
@@ -316,15 +332,15 @@ document.addEventListener("click", function (e) {
         const searchItem = e.target.closest(".search-user-item");
 
         if (chatItem) {
-            selectUser(chatItem.dataset.userId, chatItem.dataset.userName);
+            selectUser(chatItem.dataset.userId, chatItem.dataset.userName, chatItem.dataset.userEmail);
         }
 
         if (userItem) {
-            selectUser(userItem.dataset.userId, userItem.dataset.userName);
+            selectUser(userItem.dataset.userId, userItem.dataset.userName, userItem.dataset.userEmail);
         }
 
         if (searchItem) {
-            selectUser(searchItem.dataset.userId, searchItem.dataset.userName);
+            selectUser(searchItem.dataset.userId, searchItem.dataset.userName, searchItem.dataset.userEmail || "");
             document.getElementById("searchResults").innerHTML = "";
             document.getElementById("searchInput").value = "";
         }
@@ -351,6 +367,7 @@ document.getElementById("searchInput").addEventListener("input", function () {
                 div.className = "search-user-item p-2 border-bottom";
                 div.dataset.userId = user.dataset.userId;
                 div.dataset.userName = user.dataset.userName;
+                div.dataset.userEmail = user.dataset.userEmail;
                 div.textContent = user.dataset.userName;
 
                 resultsContainer.appendChild(div);
@@ -429,7 +446,7 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
             });
             notif.onclick = () => {
                 window.focus();
-                selectUser(senderId, senderName);
+                selectUser(senderId, senderName, "");
             };
         }
     }
@@ -522,5 +539,4 @@ function renderMessage(container, messageObj) {
     msgDiv.appendChild(bubble);
     container.appendChild(msgDiv);
 }
-
 

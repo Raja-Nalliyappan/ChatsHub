@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Linq;
 using System.Security.Claims;
 
-[Route("chatsHub")]
+[Route("chatshub")]
 public class ChatsHubController : Controller
 {
     private readonly IUsersRepository _usersRepository;
@@ -22,13 +22,13 @@ public class ChatsHubController : Controller
     }
 
     [HttpGet("/")]
-    public IActionResult Root() => Redirect("/chatsHub/login");
+    public IActionResult Root() => Redirect("/chatshub/login");
 
     [HttpGet("dashboard")]
     public IActionResult Index()
     {
         int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
-        if (currentUserId == 0) return Redirect("/chatsHub/login");
+        if (currentUserId == 0) return Redirect("/chatshub/login");
 
         ViewBag.UserId = currentUserId;
         ViewBag.UserName = HttpContext.Session.GetString("UserName");
