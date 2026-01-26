@@ -352,32 +352,28 @@ document.addEventListener("click", function (e) {
 
 // Search functionality
 document.getElementById("searchInput").addEventListener("input", function () {
-    try {
-        const query = this.value.toLowerCase();
-        const resultsContainer = document.getElementById("searchResults");
-        resultsContainer.innerHTML = "";
+    const query = this.value.toLowerCase();
+    const resultsContainer = document.getElementById("searchResults");
+    resultsContainer.innerHTML = "";
 
-        if (!query) return;
+    if (!query) return;
 
-        document.querySelectorAll(".user-item").forEach(user => {
-            const name = user.dataset.userName.toLowerCase();
+    document.querySelectorAll(".chat-item").forEach(user => {
+        const name = user.dataset.userName.toLowerCase();
 
-            if (name.includes(query)) {
-                const div = document.createElement("div");
-                div.className = "search-user-item p-2 border-bottom";
-                div.dataset.userId = user.dataset.userId;
-                div.dataset.userName = user.dataset.userName;
-                div.dataset.userEmail = user.dataset.userEmail;
-                div.textContent = user.dataset.userName;
+        if (name.includes(query)) {
+            const div = document.createElement("div");
+            div.className = "search-user-item p-2 border-bottom";
+            div.dataset.userId = user.dataset.userId;
+            div.dataset.userName = user.dataset.userName;
+            div.dataset.userEmail = user.dataset.userEmail || "";
+            div.textContent = user.dataset.userName;
 
-                resultsContainer.appendChild(div);
-            }
-        });
-
-    } catch (error) {
-        showError("Search failed", error);
-    }
+            resultsContainer.appendChild(div);
+        }
+    });
 });
+
 
 
 
