@@ -3,16 +3,16 @@ const CURRENT_USER_ID = parseInt(document.getElementById("currentUserId").value,
 
 let SELECTED_USER_ID = null;
 let SELECTED_USER_NAME = null;
+const IST_TIMEZONE = "Asia/Kolkata";
 
 // Utility functions
 
 // Format a date string into a readable format
 function formatTime(dateStr) {
-    if (!dateStr) {
-        return "";
-    }
-    const date = new Date(dateStr);
-    return date.toLocaleString();
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleString("en-IN", {
+        timeZone: IST_TIMEZONE
+    });
 }
 
 // Show an error message in console and alert
@@ -59,8 +59,15 @@ async function loadChatList() {
 
         // Sort by latest message
         usersWithMessages.sort((a, b) => {
-            return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+            const dateA = new Date(
+                new Date(a.lastMessageTime).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
+            );
+            const dateB = new Date(
+                new Date(b.lastMessageTime).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
+            );
+            return dateB - dateA;
         });
+
 
         let firstUser = null;
 
@@ -107,7 +114,9 @@ async function loadMessages() {
         let lastDate = null;
 
         messages.forEach(message => {
-            const msgDate = new Date(message.createAt).toDateString();
+            const msgDate = new Date(
+                new Date(message.createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
+            ).toDateString()
 
             // Add date separator if day changed
             if (msgDate !== lastDate) {
@@ -366,7 +375,10 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         (senderId === SELECTED_USER_ID && receiverId === CURRENT_USER_ID) ||
         (senderId === CURRENT_USER_ID && receiverId === SELECTED_USER_ID);
 
-    const msgDate = new Date(createAt).toDateString();
+    const msgDate = new Date(
+        new Date(createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
+    ).toDateString();
+
 
     if (isCurrentChat) {
         // Add date separator if the day has changed
@@ -440,29 +452,45 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
 //common dates Showing
 function formatDateSeparator(dateStr) {
     const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
 
-    if (date.toDateString() === today.toDateString()) return "Today";
-    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+    const now = new Date();
+    const istDate = new Date(now.toLocaleString("en-US", { timeZone: IST_TIMEZONE }));
+    const istYesterday = new Date(istDate);
+    istYesterday.setDate(istDate.getDate() - 1);
 
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric",});
+    const msgDateStr = date.toLocaleDateString("en-IN", { timeZone: IST_TIMEZONE });
+    const todayStr = istDate.toLocaleDateString("en-IN");
+    const yesterdayStr = istYesterday.toLocaleDateString("en-IN");
+
+    if (msgDateStr === todayStr) return "Today";
+    if (msgDateStr === yesterdayStr) return "Yesterday";
+
+    return date.toLocaleDateString("en-IN", {
+        timeZone: IST_TIMEZONE,
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
 }
+
 
 function formatMessageTime(dateStr) {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString(undefined, {
+    return date.toLocaleTimeString("en-IN", {
+        timeZone: IST_TIMEZONE,
         hour: "2-digit",
         minute: "2-digit",
         hour12: true
-    }).toUpperCase(); // <-- force AM/PM uppercase
+    }).toUpperCase();
 }
 
 
 
 function renderMessage(container, messageObj) {
-    const msgDate = new Date(messageObj.createAt).toDateString();
+    const msgDate = new Date(
+        new Date(messageObj.createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
+    ).toDateString();
+
     const isCurrentUser = messageObj.senderId === CURRENT_USER_ID;
 
     const msgDiv = document.createElement("div");
@@ -494,4 +522,5 @@ function renderMessage(container, messageObj) {
     msgDiv.appendChild(bubble);
     container.appendChild(msgDiv);
 }
+
 
