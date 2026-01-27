@@ -53,15 +53,14 @@ public class ChatsHubController : Controller
         return Json(users);
     }
 
+
     [Authorize]
     [HttpGet("GetMessages")]
     public IActionResult GetMessages(int otherUserId)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-            return Unauthorized();
+        int currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        int currentUserId = int.Parse(userIdClaim.Value);
+        var encryption = HttpContext.RequestServices.GetRequiredService<EncryptionService>();
 
         var messages = _usersRepository
             .GetMessages(currentUserId, otherUserId)
@@ -70,13 +69,29 @@ public class ChatsHubController : Controller
             {
                 m.SenderId,
                 m.ReceiverId,
-                m.MessageReceiverName,
-                m.Message,
+                // Safely decrypt each message
+                Message = SafeDecrypt(encryption, m.Message),
                 m.CreateAt
             });
 
         return Json(messages);
     }
+
+    // Helper method to safely decrypt messages
+    private string SafeDecrypt(EncryptionService encryption, string encryptedMessage)
+    {
+        try
+        {
+            return encryption.Decrypt(encryptedMessage);
+        }
+        catch
+        {
+            // If decryption fails (old messages or plain text), return as-is
+            return encryptedMessage;
+        }
+    }
+
+
 
     [HttpGet("login")]
     public IActionResult LoginPage() => View();

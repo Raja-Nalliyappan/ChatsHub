@@ -24,6 +24,8 @@ builder.Services.AddSession(options =>
 
 // JWT Token service
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddSingleton<EncryptionService>();
+
 
 // Dependency Injection for Repositories
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
