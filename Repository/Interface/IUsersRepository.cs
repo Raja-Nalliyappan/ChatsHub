@@ -9,5 +9,6 @@ namespace ChatsHub.Repository.Interface
         List<Messages> GetMessages(int currentUserId, int otherUserId);
         Users GetNameAndPassword(string email, string password);
         void InsertMessage(Messages msg);
+        bool DeleteChat(int senderId, int receiverId);
     }
 }

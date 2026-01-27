@@ -1,4 +1,5 @@
 ﻿using ChatsHub.Models;
+using ChatsHub.Repository;
 using ChatsHub.Repository.Interface;
 using ChatsHub.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -113,5 +114,18 @@ public class ChatsHubController : Controller
         return Json(allUsers);
     }
 
+    [Authorize]
+    [HttpDelete("Chats/DeleteChat")]
+    public IActionResult DeleteChat(int receiverId)
+    {
+        int currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        // Delete all messages where current user is sender OR receiver
+        bool result = _usersRepository.DeleteChat(currentUserId, receiverId);
+
+        return result
+            ? Ok(new { message = "Your chat deleted" })
+            : NotFound(new { message = "No messages found" });
+    }
 }
 

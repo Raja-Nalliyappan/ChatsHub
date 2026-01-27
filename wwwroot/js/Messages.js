@@ -22,6 +22,7 @@ function showError(msg, err) {
 
 // Load chat list
 async function loadChatList() {
+    showLoader();
     try {
         const token = localStorage.getItem("token");
 
@@ -77,7 +78,7 @@ async function loadChatList() {
             chatItem.dataset.userId = user.id;
             chatItem.dataset.userName = user.name;
             chatItem.dataset.userEmail = user.email;
-            chatItem.innerHTML = `<strong>${user.name}</strong>`;
+            chatItem.innerHTML = `<strong>${user.name}</strong><span class="delete-chat" title="Delete chat"> 🗑️</span>`;
 
             chatList.appendChild(chatItem);
 
@@ -91,12 +92,16 @@ async function loadChatList() {
 
     } catch (err) {
         showError("Unable to load chat list", err);
+    } finally {
+        hideLoader();
     }
 }
 
 // Load messages
 async function loadMessages() {
     if (!SELECTED_USER_ID) return;
+
+    showLoader();
 
     try {
         const token = localStorage.getItem("token");
@@ -174,6 +179,8 @@ async function loadMessages() {
         container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
     } catch (err) {
         showError("Unable to load messages", err);
+    } finally {
+        hideLoader();
     }
 }
 
@@ -245,7 +252,10 @@ connection.start()
 
 
 // Send message
+let isSending = false;
+
 async function sendMessage() {
+    if (isSending) return; // Prevent double sending
     const input = document.getElementById("messageInput");
     const message = input.value.trim();
 
@@ -253,25 +263,24 @@ async function sendMessage() {
         alert("Type a message");
         return;
     }
-
     if (!SELECTED_USER_ID) {
         alert("Select a user first");
         return;
     }
-
     if (connection.state !== signalR.HubConnectionState.Connected) {
         alert("SignalR not connected");
         return;
     }
 
+    isSending = true; // lock
     const sendButton = document.getElementById("sendBtn");
-    sendButton.disabled = true;  // Disable the button temporarily to prevent multiple clicks
+    sendButton.disabled = true;
 
     try {
         await connection.invoke("SendMessage", message, SELECTED_USER_ID);
-        input.value = ""; // Clear input after sending
+        input.value = ""; // clear input
 
-        // ===== Add user to chat list immediately if not present =====
+        // Add user to chat list if not present
         const chatList = document.getElementById("chatList");
         let chatItem = chatList.querySelector(`.chat-item[data-user-id="${SELECTED_USER_ID}"]`);
         if (!chatItem) {
@@ -279,15 +288,17 @@ async function sendMessage() {
             chatItem.className = "chat-item mt-3";
             chatItem.dataset.userId = SELECTED_USER_ID;
             chatItem.dataset.userName = SELECTED_USER_NAME;
-            chatItem.innerHTML = `<strong>${SELECTED_USER_NAME}</strong>`;
+            chatItem.innerHTML = `<strong>${SELECTED_USER_NAME}</strong><span class="delete-chat"> 🗑️</span>`;
             chatList.insertBefore(chatItem, chatList.children[1]);
         }
     } catch (err) {
         showError("Unable to send message", err);
     } finally {
-        sendButton.disabled = false;  // Re-enable the button
+        isSending = false; // release lock
+        sendButton.disabled = false;
     }
 }
+
 
 
 // Event listeners
@@ -306,6 +317,7 @@ document.getElementById("sendBtn").addEventListener("click", sendMessage);
 // Handle Enter key in message input
 document.getElementById("messageInput").addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
+        e.preventDefault();
         sendMessage();
     }
 });
@@ -351,35 +363,64 @@ document.addEventListener("click", function (e) {
 });
 
 // Search functionality
-document.getElementById("searchInput").addEventListener("input", async function () {
-    const query = this.value.toLowerCase();
-    const resultsContainer = document.getElementById("searchResults");
-    resultsContainer.innerHTML = "";
+
+let searchTimeout;
+
+const searchInput = document.getElementById("searchInput");
+const resultsContainer = document.getElementById("searchResults");
+
+searchInput.addEventListener("input", function () {
+    const query = this.value.trim().toLowerCase();
+
+    clearTimeout(searchTimeout); // cancel previous search
+    resultsContainer.innerHTML = ""; // clear immediately
 
     if (!query) return;
 
-    try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("/ChatsHub/GetAllUsers", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        const users = await response.json();
-
-        users
-            .filter(user => user.name.toLowerCase().includes(query))
-            .forEach(user => {
-                const div = document.createElement("div");
-                div.className = "search-user-item p-2 border-bottom";
-                div.dataset.userId = user.id;
-                div.dataset.userName = user.name;
-                div.dataset.userEmail = user.email || "";
-                div.textContent = user.name;
-
-                resultsContainer.appendChild(div);
+    searchTimeout = setTimeout(async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("/ChatsHub/GetAllUsers", {
+                headers: { "Authorization": `Bearer ${token}` }
             });
+            const users = await response.json();
 
-    } catch (err) {
-        console.error("Search failed:", err);
+            const seenUserIds = new Set();
+
+            users
+                .filter(u => u.name.toLowerCase().includes(query))
+                .forEach(user => {
+                    if (seenUserIds.has(user.id)) return;
+                    seenUserIds.add(user.id);
+
+                    const div = document.createElement("div");
+                    div.className = "search-user-item p-2 border-bottom";
+                    div.dataset.userId = user.id;
+                    div.dataset.userName = user.name;
+                    div.dataset.userEmail = user.email || "";
+                    div.textContent = user.name;
+
+                    // Click on search result
+                    div.addEventListener("click", () => {
+                        selectUser(user.id, user.name, user.email || "");
+                        resultsContainer.innerHTML = ""; // clear results
+                        searchInput.value = ""; // clear input
+                    });
+
+                    resultsContainer.appendChild(div);
+                });
+
+        } catch (err) {
+            console.error("Search failed:", err);
+        }
+    }, 300); // 300ms debounce
+});
+
+// Click outside input and results → clear search and input
+document.addEventListener("click", function (e) {
+    if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.innerHTML = ""; // clear results
+        searchInput.value = "";          // clear input letters
     }
 });
 
@@ -433,7 +474,7 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
             chatItem.className = "chat-item mt-3";
             chatItem.dataset.userId = senderId;
             chatItem.dataset.userName = senderName;
-            chatItem.innerHTML = `<strong>${senderName}</strong>`;
+            chatItem.innerHTML = `<strong>${senderName}</strong><span class="delete-chat"> 🗑️</span>`;
             chatList.insertBefore(chatItem, chatList.children[1]);
         }
 
@@ -545,3 +586,59 @@ function renderMessage(container, messageObj) {
     container.appendChild(msgDiv);
 }
 
+
+
+//Delete User Chat
+document.addEventListener("click", async (e) => {
+    const deleteBtn = e.target.closest(".delete-chat");
+    if (!deleteBtn) return;
+
+    e.stopPropagation();
+
+    const chatItem = deleteBtn.closest(".chat-item");
+    const otherUserId = parseInt(chatItem.dataset.userId, 10);
+
+    if (!confirm("This will delete the chat for both you and the other user. Are you sure?")) return;
+
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+            `/chatshub/Chats/DeleteChat?receiverId=${otherUserId}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!response.ok) throw new Error("Delete failed");
+
+        // ✅ Remove chat from UI
+        chatItem.remove();
+
+        const chatList = document.getElementById("chatList");
+        const remainingChats = chatList.querySelectorAll(".chat-item");
+
+        // If the deleted chat was open, select the next one
+        if (SELECTED_USER_ID === otherUserId) {
+            document.getElementById("messagesContainer").innerHTML = "";
+            document.getElementById("chatHeaderUser").innerHTML = "";
+            SELECTED_USER_ID = null;
+
+            if (remainingChats.length > 0) {
+                // Pick the first remaining chat
+                const firstChat = remainingChats[0];
+                const nextUserId = parseInt(firstChat.dataset.userId, 10);
+                const nextUserName = firstChat.dataset.userName;
+                const nextUserEmail = firstChat.dataset.userEmail;
+
+                selectUser(nextUserId, nextUserName, nextUserEmail);
+            }
+        }
+
+    } catch (err) {
+        showError("Unable to delete chat", err);
+    }
+});

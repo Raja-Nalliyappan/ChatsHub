@@ -45,6 +45,9 @@
     padding: 8px;
     cursor: pointer;
     border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .chat-item.active,
@@ -161,6 +164,18 @@
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
+}
+
+.chat-item strong {
+    display: flex;
+    align-items: center; 
+    gap: 6px; 
+}
+
+
+.delete-chat {
+    margin-left: auto;
+    cursor: pointer;
 }
 
 

@@ -15,6 +15,26 @@ namespace ChatsHub.Repository
             _dbConnection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
         }
 
+        public bool DeleteChat(int currentUserId, int otherUserId)
+        {
+            string query = @"
+                DELETE FROM ""Messages""
+                WHERE (""SenderId"" = @CurrentUserId AND ""ReceiverId"" = @OtherUserId)
+                   OR (""SenderId"" = @OtherUserId AND ""ReceiverId"" = @CurrentUserId)
+            ";
+
+            int rows = _dbConnection.Execute(query, new
+            {
+                CurrentUserId = currentUserId,
+                OtherUserId = otherUserId
+            });
+
+            return rows > 0;
+        }
+
+
+
+
         public List<Users> GetAllUsers()
         {
             string AllUsers = "Select * from \"Users\"";
