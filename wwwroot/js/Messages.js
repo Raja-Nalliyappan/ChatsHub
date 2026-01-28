@@ -26,11 +26,7 @@ async function loadChatList() {
     try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch('/ChatsHub/GetChatUsers', {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        });
+        const response = await fetchWithAuth('/ChatsHub/GetChatUsers')
 
         let users = await response.json();
 
@@ -41,11 +37,7 @@ async function loadChatList() {
 
         // 🔥 KEEP ONLY USERS WHO HAVE MESSAGES
         for (const user of users) {
-            const msgResponse = await fetch(`/ChatsHub/GetMessages?otherUserId=${user.id}`, {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+            const msgResponse = await fetchWithAuth(`/ChatsHub/GetMessages?otherUserId=${user.id}`);
 
             const messages = await msgResponse.json();
 
@@ -107,9 +99,7 @@ async function loadMessages() {
         const token = localStorage.getItem("token");
         if (!token) return showError("User not logged in", "Token missing");
 
-        const response = await fetch(`/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+        const response = await fetchWithAuth(`/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`)
         const messages = await response.json();
         const container = document.getElementById("messagesContainer");
         container.innerHTML = "";
@@ -235,9 +225,10 @@ if (!token) {
     alert("User not logged in. Token missing.");
 }
 
+
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/chatHub", {
-        accessTokenFactory: () => token
+        accessTokenFactory: () => localStorage.getItem("token")
     })
     .withAutomaticReconnect()
     .build();
@@ -380,9 +371,7 @@ searchInput.addEventListener("input", function () {
     searchTimeout = setTimeout(async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("/ChatsHub/GetAllUsers", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const response = await fetchWithAuth("/ChatsHub/GetAllUsers");
             const users = await response.json();
 
             const seenUserIds = new Set();
@@ -603,15 +592,13 @@ document.addEventListener("click", async (e) => {
     try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch(
+        const response = await fetchWithAuth(
             `/chatshub/Chats/DeleteChat?receiverId=${otherUserId}`,
             {
-                method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                method: "DELETE"
             }
         );
+
 
         if (!response.ok) throw new Error("Delete failed");
 
@@ -640,5 +627,17 @@ document.addEventListener("click", async (e) => {
 
     } catch (err) {
         showError("Unable to delete chat", err);
+    }
+});
+
+
+
+connection.onclose(async (error) => {
+    console.log("SignalR disconnected", error);
+
+    if (error && error.message.includes("401")) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("token");
+        window.location.href = "/Login";
     }
 });

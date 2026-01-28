@@ -78,3 +78,30 @@ function showToast(message, type) {
         if (loader) loader.style.display = "none";
     };
 })();
+
+
+
+
+
+//Token Expire Check
+
+async function fetchWithAuth(url, options = {}) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...(options.headers || {}),
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (response.status === 401) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("token");
+        window.location.href = "/Login";
+        throw new Error("Unauthorized"); // 🔥 important
+    }
+
+    return response;
+}
