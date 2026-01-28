@@ -121,13 +121,13 @@ public class ChatsHubController : Controller
         });
     }
 
-    [Authorize]
-    [HttpGet("GetAllUsers")]
-    public IActionResult GetAllUsers()
-    {
-        var allUsers = _usersRepository.GetAllUsers(); // Assuming this returns all users
-        return Json(allUsers);
-    }
+    //[Authorize]
+    //[HttpGet("GetAllUsers")]
+    //public IActionResult GetAllUsers()
+    //{
+    //    var allUsers = _usersRepository.GetAllUsers();
+    //    return Json(allUsers);
+    //}
 
     [Authorize]
     [HttpDelete("Chats/DeleteChat")]
@@ -142,5 +142,17 @@ public class ChatsHubController : Controller
             ? Ok(new { message = "Your chat deleted" })
             : NotFound(new { message = "No messages found" });
     }
+
+
+    [HttpGet("GetChattedUsers")]
+    public async Task<IActionResult> GetChattedUsers()
+    {
+        int currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var users = await _usersRepository.GetChattedUsersAsync(currentUserId);
+
+        return Ok(users);
+    }
+
 }
 

@@ -1,4 +1,5 @@
 ﻿using ChatsHub.Models;
+using ChatsHub.Models.DtoFiles;
 using ChatsHub.Repository.Interface;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -92,6 +93,37 @@ namespace ChatsHub.Repository
             );
         }
 
+
+        // Repository method returning DTO
+        async Task<List<ChattedUserDto>> IUsersRepository.GetChattedUsersAsync(int currentUserId)
+        {
+            using var connection = CreateConnection();
+
+            const string sql = @"
+                    SELECT DISTINCT 
+                        u.""Id"",
+                        u.""Name"",
+                        u.""Email"",
+                        u.""Phone"",
+                        u.""Role"",
+                        u.""IsActive""
+                    FROM ""Users"" u
+                    INNER JOIN ""Messages"" m
+                        ON (
+                            (m.""SenderId"" = @UserId AND m.""ReceiverId"" = u.""Id"")
+                            OR
+                            (m.""ReceiverId"" = @UserId AND m.""SenderId"" = u.""Id"")
+                        )
+                    WHERE u.""Id"" <> @UserId;
+                ";
+
+            var users = await connection.QueryAsync<ChattedUserDto>(
+                sql,
+                new { UserId = currentUserId }
+            );
+
+            return users.ToList();
+        }
 
     }
 }

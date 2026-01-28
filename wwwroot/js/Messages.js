@@ -24,60 +24,44 @@ function showError(msg, err) {
 async function loadChatList() {
     showLoader();
     try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetchWithAuth('/ChatsHub/GetChatUsers')
-
-        let users = await response.json();
+        // Fetch only users you've chatted with
+        const response = await fetchWithAuth("/ChatsHub/GetChattedUsers");
+        const users = await response.json();
 
         const chatList = document.getElementById("chatList");
         chatList.innerHTML = "<strong>Chats</strong>";
 
-        let usersWithMessages = [];
-
-        // 🔥 KEEP ONLY USERS WHO HAVE MESSAGES
-        for (const user of users) {
-            const msgResponse = await fetchWithAuth(`/ChatsHub/GetMessages?otherUserId=${user.id}`);
-
-            const messages = await msgResponse.json();
-
-            if (messages && messages.length > 0) {
-                usersWithMessages.push({
-                    ...user,
-                    lastMessageTime: messages[messages.length - 1].createAt
-                });
-            }
+        if (!users || users.length === 0) {
+            chatList.innerHTML += "<div>No chats yet</div>";
+            return;
         }
 
-        // Sort by latest message
-        usersWithMessages.sort((a, b) => {
-            const dateA = new Date(
-                new Date(a.lastMessageTime).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
-            );
-            const dateB = new Date(
-                new Date(b.lastMessageTime).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
-            );
-            return dateB - dateA;
+        // Sort by last message if backend provides it
+        users.sort((a, b) => {
+            if (!a.lastMessageTime) return 1;
+            if (!b.lastMessageTime) return -1;
+            return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
         });
-
 
         let firstUser = null;
 
-        // Render chat list
-        usersWithMessages.forEach((user, index) => {
+        users.forEach((user, index) => {
             const chatItem = document.createElement("div");
             chatItem.className = "chat-item mt-3";
             chatItem.dataset.userId = user.id;
             chatItem.dataset.userName = user.name;
-            chatItem.dataset.userEmail = user.email;
-            chatItem.innerHTML = `<strong>${user.name}</strong><span class="delete-chat" title="Delete chat"> 🗑️</span>`;
+            chatItem.dataset.userEmail = user.email || "";
+            chatItem.innerHTML = `
+                <strong>${user.name}</strong>
+                <span class="delete-chat" title="Delete chat"> 🗑️</span>
+            `;
 
             chatList.appendChild(chatItem);
 
             if (index === 0) firstUser = user;
         });
 
-        // Auto-select latest chat
+        // Auto-select the first chat
         if (firstUser) {
             selectUser(firstUser.id, firstUser.name, firstUser.email);
         }
@@ -88,6 +72,7 @@ async function loadChatList() {
         hideLoader();
     }
 }
+
 
 // Load messages
 async function loadMessages() {
