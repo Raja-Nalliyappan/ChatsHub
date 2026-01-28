@@ -121,13 +121,13 @@ public class ChatsHubController : Controller
         });
     }
 
-    //[Authorize]
-    //[HttpGet("GetAllUsers")]
-    //public IActionResult GetAllUsers()
-    //{
-    //    var allUsers = _usersRepository.GetAllUsers();
-    //    return Json(allUsers);
-    //}
+    [Authorize]
+    [HttpGet("GetAllUsers")]
+    public IActionResult GetAllUsers()
+    {
+        var allUsers = _usersRepository.GetAllUsers();
+        return Json(allUsers);
+    }
 
     [Authorize]
     [HttpDelete("Chats/DeleteChat")]
