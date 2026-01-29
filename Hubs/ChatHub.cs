@@ -75,10 +75,10 @@ public class ChatHub : Hub
 
         // ✅ Send plain JSON to clients (NOT encrypted)
         await Clients.Group(receiverId.ToString())
-            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt);
+            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt, receiver);
 
         await Clients.Group(senderId.Value.ToString())
-            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt);
+            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt, receiver);
     }
 
 

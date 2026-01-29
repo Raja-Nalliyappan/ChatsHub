@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "\\\\eainns002\\userprofilesxb$\\eespl574\\Desktop\\ChatsHub\\ChatsHub.csproj": {}
+    "R:\\Edgar ChatsHub\\Edgar\\ChatsHub\\ChatsHub.csproj": {}
   },
   "projects": {
-    "\\\\eainns002\\userprofilesxb$\\eespl574\\Desktop\\ChatsHub\\ChatsHub.csproj": {
+    "R:\\Edgar ChatsHub\\Edgar\\ChatsHub\\ChatsHub.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "\\\\eainns002\\userprofilesxb$\\eespl574\\Desktop\\ChatsHub\\ChatsHub.csproj",
+        "projectUniqueName": "R:\\Edgar ChatsHub\\Edgar\\ChatsHub\\ChatsHub.csproj",
         "projectName": "ChatsHub",
-        "projectPath": "\\\\eainns002\\userprofilesxb$\\eespl574\\Desktop\\ChatsHub\\ChatsHub.csproj",
-        "packagesPath": "C:\\Users\\eespl574\\.nuget\\packages\\",
-        "outputPath": "\\\\eainns002\\userprofilesxb$\\eespl574\\Desktop\\ChatsHub\\obj\\",
+        "projectPath": "R:\\Edgar ChatsHub\\Edgar\\ChatsHub\\ChatsHub.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "R:\\Edgar ChatsHub\\Edgar\\ChatsHub\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "\\\\eainns002\\userprofilesxb$\\eespl574\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

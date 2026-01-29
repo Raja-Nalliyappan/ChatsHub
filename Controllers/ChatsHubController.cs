@@ -189,8 +189,6 @@ public class ChatsHubController : Controller
         return Ok(new { image = "/chat-images/" + fileName });
     }
 
-
-
 }
 
 

@@ -124,7 +124,7 @@ async function loadMessages() {
             bubble.style.display = "inline-block";
             bubble.style.padding = "8px 12px";
             bubble.style.margin = "5px 0";
-            bubble.style.maxWidth = "70%";
+            bubble.style.maxWidth = "100%";
             bubble.style.borderRadius = "10px";
             bubble.style.wordWrap = "break-word";
             bubble.style.backgroundColor = isCurrentUser ? "#0078d7" : "#f3f2f1";
@@ -460,8 +460,8 @@ document.addEventListener("click", function (e) {
 
 
 
-//Receive Notification
-connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt) => {
+//Receive Message
+connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt, receiver) => {
     let parsed;
     try {
         parsed = JSON.parse(message);
@@ -512,9 +512,9 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         chatItem = document.createElement("div");
         chatItem.className = "chat-item mt-3";
         chatItem.dataset.userId = userId;
-        chatItem.dataset.userName = senderName; // IMPORTANT
-        chatItem.dataset.userEmail = ""; // optional
-        chatItem.innerHTML = `<strong>${senderName}</strong><span class="delete-chat"> 🗑️</span>`;
+        chatItem.dataset.userName = receiver.name; 
+        chatItem.dataset.userEmail = ""; 
+        chatItem.innerHTML = `<strong>${receiver.name}</strong><span class="delete-chat"> 🗑️</span>`;
         chatList.insertBefore(chatItem, chatList.children[1]);
     }
 
