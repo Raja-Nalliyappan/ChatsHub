@@ -4,6 +4,8 @@ const CURRENT_USER_ID = parseInt(document.getElementById("currentUserId").value,
 let SELECTED_USER_ID = null;
 let SELECTED_USER_NAME = null;
 const IST_TIMEZONE = "Asia/Kolkata";
+let selectedImageFile = null;
+let isSending = false;
 
 
 // Format a date string into a readable format
@@ -87,6 +89,7 @@ async function loadMessages() {
         const response = await fetchWithAuth(`/ChatsHub/GetMessages?otherUserId=${SELECTED_USER_ID}`)
         const messages = await response.json();
         const container = document.getElementById("messagesContainer");
+        container.scrollTop = container.scrollHeight;
         container.innerHTML = "";
 
         if (!messages || messages.length === 0) return;
@@ -129,9 +132,31 @@ async function loadMessages() {
             bubble.style.position = "relative";
 
             // Message text
-            const msgText = document.createElement("div");
-            msgText.textContent = message.message;
-            bubble.appendChild(msgText);
+            let data;
+            try {
+                data = JSON.parse(message.message);
+            } catch {
+                data = { text: message.message, image: null };
+            }
+
+            // Image
+            if (data.image) {
+                const img = document.createElement("img");
+                img.src = data.image;
+                img.style.maxWidth = "650px";
+                img.style.borderRadius = "8px";
+                img.style.display = "block";
+                img.style.marginBottom = "5px";
+                bubble.appendChild(img);
+            }
+
+            // Text
+            if (data.text) {
+                const msgText = document.createElement("div");
+                msgText.textContent = data.text;
+                bubble.appendChild(msgText);
+            }
+
 
             // Timestamp below text
             const time = document.createElement("div");
@@ -151,7 +176,7 @@ async function loadMessages() {
             container.appendChild(msgDiv);
         });
 
-        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        //container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
     } catch (err) {
         showError("Unable to load messages", err);
     } finally {
@@ -227,53 +252,85 @@ connection.start()
     });
 
 
-// Send message
-let isSending = false;
 
+// ✅ SEND MESSAGE (TEXT + IMAGE)
 async function sendMessage() {
-    if (isSending) return; // Prevent double sending
-    const input = document.getElementById("messageInput");
-    const message = input.value.trim();
+    showLoader();
+    if (isSending) return;
 
-    if (!message) {
-        alert("Type a message");
+    const input = document.getElementById("messageInput");
+    const textMessage = input.value.trim();
+
+    if (!textMessage && !selectedImageFile) {
+        alert("Type a message or select an image");
         return;
     }
+
     if (!SELECTED_USER_ID) {
         alert("Select a user first");
         return;
     }
+
     if (connection.state !== signalR.HubConnectionState.Connected) {
         alert("SignalR not connected");
         return;
     }
 
-    isSending = true; // lock
-    const sendButton = document.getElementById("sendBtn");
-    sendButton.disabled = true;
+    isSending = true;
+    document.getElementById("sendBtn").disabled = true;
 
     try {
-        await connection.invoke("SendMessage", message, SELECTED_USER_ID);
-        input.value = ""; // clear input
+        let imageUrl = null;
 
-        // Add user to chat list if not present
-        const chatList = document.getElementById("chatList");
-        let chatItem = chatList.querySelector(`.chat-item[data-user-id="${SELECTED_USER_ID}"]`);
-        if (!chatItem) {
-            chatItem = document.createElement("div");
-            chatItem.className = "chat-item mt-3";
-            chatItem.dataset.userId = SELECTED_USER_ID;
-            chatItem.dataset.userName = SELECTED_USER_NAME;
-            chatItem.innerHTML = `<strong>${SELECTED_USER_NAME}</strong><span class="delete-chat"> 🗑️</span>`;
-            chatList.insertBefore(chatItem, chatList.children[1]);
+        // Upload image first
+        if (selectedImageFile) {
+            const formData = new FormData();
+            formData.append("image", selectedImageFile);
+
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("User not logged in");
+
+            const response = await fetchWithAuth("/ChatsHub/upload-image", {
+                method: "POST",
+                body: formData
+            });
+
+
+            if (!response.ok) throw new Error("Image upload failed");
+
+            // Parse as text instead of JSON
+            const result = await response.json();
+            imageUrl = result.image;
+
         }
+
+
+        // Send SignalR message
+        const messageObj = {
+            text: textMessage,
+            image: imageUrl
+        };
+
+        await connection.invoke("SendMessage", JSON.stringify(messageObj), SELECTED_USER_ID);
+
+        // Clear inputs
+        input.value = "";
+        document.getElementById("imageInput").value = "";
+        selectedImageFile = null;
+
     } catch (err) {
-        showError("Unable to send message", err);
+        console.error(err);
+        alert(err.message || "Unable to send message");
     } finally {
-        isSending = false; // release lock
-        sendButton.disabled = false;
+        isSending = false;
+        document.getElementById("sendBtn").disabled = false;
+        const preview = document.getElementById("imagePreview");
+        preview.innerHTML = "";
+        hideLoader();
     }
 }
+
+
 
 
 
@@ -292,7 +349,7 @@ document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
 // Handle Enter key in message input
 document.getElementById("messageInput").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
     }
@@ -405,7 +462,17 @@ document.addEventListener("click", function (e) {
 
 //Receive Notification
 connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt) => {
+
+    let parsed;
+    try {
+        parsed = JSON.parse(message);
+    } catch {
+        parsed = { text: message, image: null };
+    }
+
+
     const container = document.getElementById("messagesContainer");
+    container.scrollTop = container.scrollHeight;
     const chatList = document.getElementById("chatList");
 
     const isCurrentChat =
@@ -433,12 +500,12 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         // Append the actual message
         renderMessage(container, {
             senderId,
-            message,
+            message: JSON.stringify(parsed),
             createAt
         });
 
 
-        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        //container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
 
     } else if (senderId !== CURRENT_USER_ID) {
         // Add unread dot to chat list item
@@ -461,14 +528,17 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         // Browser notification
         if (Notification.permission === "granted") {
             const notif = new Notification(senderName, {
-                body: message,
+                body: parsed.text || "📷 Image",
                 icon: "/path/to/icon.png"
             });
+
             notif.onclick = () => {
                 window.focus();
                 selectUser(senderId, senderName, "");
+                notif.close(); 
             };
         }
+
     }
 
     // Move user to top of chat list
@@ -524,6 +594,7 @@ function formatMessageTime(dateStr) {
 
 
 function renderMessage(container, messageObj) {
+
     const msgDate = new Date(
         new Date(messageObj.createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
     ).toDateString();
@@ -545,20 +616,45 @@ function renderMessage(container, messageObj) {
     bubble.style.backgroundColor = isCurrentUser ? "#0078d7" : "#f3f2f1";
     bubble.style.color = isCurrentUser ? "#fff" : "#000";
 
-    const text = document.createElement("div");
-    text.textContent = messageObj.message;
+    // ✅ Parse message (text + image)
+    let data;
+    try {
+        data = JSON.parse(messageObj.message);
+    } catch {
+        // fallback for old text-only messages
+        data = { text: messageObj.message, image: null };
+    }
 
+    // ✅ Show Image (if exists)
+    if (data.image) {
+        const img = document.createElement("img");
+        img.src = data.image;
+        img.style.maxWidth = "650px";
+        img.style.borderRadius = "8px";
+        img.style.display = "block";
+        img.style.marginBottom = "5px";
+        bubble.appendChild(img);
+    }
+
+    // ✅ Show Text (if exists)
+    if (data.text) {
+        const text = document.createElement("div");
+        text.textContent = data.text;
+        bubble.appendChild(text);
+    }
+
+    // ✅ Time
     const time = document.createElement("div");
     time.textContent = formatMessageTime(messageObj.createAt);
     time.style.fontSize = "0.7em";
     time.style.textAlign = "right";
     time.style.opacity = "0.8";
 
-    bubble.appendChild(text);
     bubble.appendChild(time);
     msgDiv.appendChild(bubble);
     container.appendChild(msgDiv);
 }
+
 
 
 
@@ -623,6 +719,57 @@ connection.onclose(async (error) => {
     if (error && error.message.includes("401")) {
         alert("Session expired. Please login again.");
         localStorage.removeItem("token");
-        window.location.href = "/Login";
+        window.location.href = "/chatshub/login";
     }
 });
+
+
+// Image input change
+document.getElementById("imageInput").addEventListener("change", function () {
+    selectedImageFile = this.files[0];
+    showImagePreview(selectedImageFile);
+});
+
+// Paste screenshot
+document.getElementById("messageInput").addEventListener("paste", function (event) {
+    const items = (event.clipboardData || window.clipboardData).items;
+    for (let item of items) {
+        if (item.type.includes("image")) {
+            selectedImageFile = item.getAsFile();
+            showImagePreview(selectedImageFile);
+        }
+    }
+});
+
+// Function to display image preview
+function showImagePreview(file) {
+    const preview = document.getElementById("imagePreview");
+    preview.innerHTML = "";
+
+    if (!file) return;
+
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.style.maxWidth = "650px";
+    img.style.borderRadius = "8px";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+
+    const removeBtn = document.createElement("span");
+    removeBtn.textContent = "✖";
+    removeBtn.style.cursor = "pointer";
+    removeBtn.style.marginLeft = "8px";
+    removeBtn.style.color = "red";
+    removeBtn.style.fontWeight = "bold";
+    removeBtn.onclick = () => {
+        selectedImageFile = null;
+        preview.innerHTML = "";
+        document.getElementById("imageInput").value = "";
+    };
+
+    preview.appendChild(img);
+    preview.appendChild(removeBtn);
+}
+
+
+

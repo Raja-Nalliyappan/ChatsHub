@@ -69,13 +69,14 @@ public class ChatsHubController : Controller
             {
                 m.SenderId,
                 m.ReceiverId,
-                // Safely decrypt each message
-                Message = SafeDecrypt(encryption, m.Message),
+                Message = SafeDecrypt(encryption, m.Message), // ✅ decrypted JSON or text
                 m.CreateAt
-            });
+            })
+            .ToList(); // ✅ important
 
-        return Json(messages);
+        return Ok(messages);
     }
+
 
     // Helper method to safely decrypt messages
     private string SafeDecrypt(EncryptionService encryption, string encryptedMessage)
@@ -154,5 +155,44 @@ public class ChatsHubController : Controller
         return Ok(users);
     }
 
+
+
+
+
+    [Authorize]
+    [HttpPost("upload-image")]
+    public async Task<IActionResult> UploadImage(IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+            return BadRequest("No image selected");
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        var extension = Path.GetExtension(image.FileName).ToLower();
+
+        if (!allowedExtensions.Contains(extension))
+            return BadRequest("Invalid image type");
+
+        var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/chat-images");
+
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
+
+        var fileName = Guid.NewGuid().ToString() + extension;
+        var filePath = Path.Combine(folderPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await image.CopyToAsync(stream);
+        }
+
+        // ✅ Return proper JSON
+        return Ok(new { image = "/chat-images/" + fileName });
+    }
+
+
+
 }
+
+
+
 

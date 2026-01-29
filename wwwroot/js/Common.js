@@ -99,9 +99,12 @@ async function fetchWithAuth(url, options = {}) {
     if (response.status === 401) {
         alert("Session expired. Please login again.");
         localStorage.removeItem("token");
-        window.location.href = "/Login";
-        throw new Error("Unauthorized"); // 🔥 important
+        window.location.href = "/chatshub/login";
+        throw new Error("Unauthorized"); 
     }
 
     return response;
 }
+
+
+

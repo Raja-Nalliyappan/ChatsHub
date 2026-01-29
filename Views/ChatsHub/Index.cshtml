@@ -97,14 +97,31 @@
             <!-- Messages load dynamically -->
         </div>
 
+        
+        
         <!-- CHAT INPUT -->
-        <div class="chat-input d-flex align-items-center gap-2 p-2 border-top">
-            <input type="text" id="messageInput" class="form-control shadow-none bg-light" placeholder="Type a message">
-            @* <i class="bi bi-paperclip fs-5"></i> *@
-            @* <i class="bi bi-emoji-smile fs-5"></i> *@
-            <button id="sendBtn" class="btn btn-primary">
-                <i class="bi bi-send"></i>
-            </button>
+        <div class="chat-input p-2 border-top d-flex flex-column gap-2">
+
+            <div id="imagePreview" class="image-preview"></div>
+
+            <!-- Input row -->
+            <div class="input-row">
+                <input type="text"
+                       id="messageInput"
+                       class="form-control shadow-none bg-light"
+                       placeholder="Type your message, paste a screenshot, or upload an image…">
+
+                <input type="file" id="imageInput" accept="image/*" hidden>
+
+                <button class="btn btn-light"
+                        onclick="document.getElementById('imageInput').click()">
+                    <i class="bi bi-paperclip"></i>
+                </button>
+
+                <button id="sendBtn" class="btn btn-primary">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -149,22 +166,12 @@
 
     </div>
 
-
-
-
-
-
 </div>
 
 @section Scripts {
-
-    <!-- SignalR Library (IMPORTANT) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
-    <!-- Chat JS (SignalR + AJAX) -->
     <script src="~/js/Messages.js"></script>
-
-    <!-- Other JS -->
     <script src="~/js/Common.js"></script>
     <script src="~/js/Login.js"></script>
 }

@@ -179,5 +179,51 @@
 }
 
 
+/* Chat input container */
+.chat-input {
+    background: #fff;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
+/* Image preview container - big and centered */
+.image-preview {
+    display: flex;
+    justify-content: center; /* center horizontally */
+    align-items: center; /* center vertically */
+    max-height: 250px; /* big preview */
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 5px;
+    background-color: #f9f9f9;
+}
 
+    /* Image inside preview */
+    .image-preview img {
+        max-height: 240px; /* make image big */
+        max-width: 100%;
+        object-fit: contain; /* keep aspect ratio */
+        border-radius: 6px;
+    }
+
+/* Input row layout */
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Message input */
+#messageInput {
+    flex: 1;
+    height: 55px;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    resize: none;
+    border: 1px solid #ccc;
+}

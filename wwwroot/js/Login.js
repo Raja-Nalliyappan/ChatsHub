@@ -48,7 +48,7 @@
 function logout() {
     showLoader();
 
-    localStorage.removeItem("token"); // ✅ clear JWT
+    localStorage.removeItem("token"); 
 
     setTimeout(function () {
         window.location.href = "/chatshub/login";

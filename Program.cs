@@ -85,7 +85,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession(); // must be BEFORE auth
+app.UseSession(); 
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -93,6 +93,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR hub
-app.MapHub<ChatHub>("/chatHub"); // <-- THIS LINE IS REQUIRED
+app.MapHub<ChatHub>("/chatHub"); 
 
 app.Run();
