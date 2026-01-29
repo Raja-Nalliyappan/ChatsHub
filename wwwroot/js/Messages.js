@@ -462,7 +462,6 @@ document.addEventListener("click", function (e) {
 
 //Receive Notification
 connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt) => {
-
     let parsed;
     try {
         parsed = JSON.parse(message);
@@ -470,9 +469,7 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         parsed = { text: message, image: null };
     }
 
-
     const container = document.getElementById("messagesContainer");
-    container.scrollTop = container.scrollHeight;
     const chatList = document.getElementById("chatList");
 
     const isCurrentChat =
@@ -483,9 +480,8 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         new Date(createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
     ).toDateString();
 
-
     if (isCurrentChat) {
-        // Add date separator if the day has changed
+        // Date separator
         const lastMsgDate = container.lastChild?.dataset?.msgDate;
         if (msgDate !== lastMsgDate) {
             const separator = document.createElement("div");
@@ -497,56 +493,53 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
             container.appendChild(separator);
         }
 
-        // Append the actual message
+        // Render message
         renderMessage(container, {
             senderId,
             message: JSON.stringify(parsed),
             createAt
         });
 
-
-        //container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-
-    } else if (senderId !== CURRENT_USER_ID) {
-        // Add unread dot to chat list item
-        let chatItem = chatList.querySelector(`.chat-item[data-user-id="${senderId}"]`);
-        if (!chatItem) {
-            chatItem = document.createElement("div");
-            chatItem.className = "chat-item mt-3";
-            chatItem.dataset.userId = senderId;
-            chatItem.dataset.userName = senderName;
-            chatItem.innerHTML = `<strong>${senderName}</strong><span class="delete-chat"> 🗑️</span>`;
-            chatList.insertBefore(chatItem, chatList.children[1]);
-        }
-
-        if (!chatItem.querySelector(".unread-dot")) {
-            const dot = document.createElement("span");
-            dot.className = "unread-dot";
-            chatItem.appendChild(dot);
-        }
-
-        // Browser notification
-        if (Notification.permission === "granted") {
-            const notif = new Notification(senderName, {
-                body: parsed.text || "📷 Image",
-                icon: "/path/to/icon.png"
-            });
-
-            notif.onclick = () => {
-                window.focus();
-                selectUser(senderId, senderName, "");
-                notif.close(); 
-            };
-        }
-
+        container.scrollTop = container.scrollHeight; // auto scroll
     }
 
-    // Move user to top of chat list
+    // Handle chat list item (existing or new)
     const userId = senderId === CURRENT_USER_ID ? receiverId : senderId;
-    const chatItem = chatList.querySelector(`.chat-item[data-user-id="${userId}"]`);
-    if (chatItem) {
-        chatItem.remove();
+    let chatItem = chatList.querySelector(`.chat-item[data-user-id="${userId}"]`);
+
+    if (!chatItem) {
+        // NEW USER: create chat item
+        chatItem = document.createElement("div");
+        chatItem.className = "chat-item mt-3";
+        chatItem.dataset.userId = userId;
+        chatItem.dataset.userName = senderName; // IMPORTANT
+        chatItem.dataset.userEmail = ""; // optional
+        chatItem.innerHTML = `<strong>${senderName}</strong><span class="delete-chat"> 🗑️</span>`;
         chatList.insertBefore(chatItem, chatList.children[1]);
+    }
+
+    // Add unread dot if the message is from other user
+    if (senderId !== CURRENT_USER_ID && !chatItem.querySelector(".unread-dot")) {
+        const dot = document.createElement("span");
+        dot.className = "unread-dot";
+        chatItem.appendChild(dot);
+    }
+
+    // Move chat item to top
+    chatItem.remove();
+    chatList.insertBefore(chatItem, chatList.children[1]);
+
+    // Browser notification for new message
+    if (senderId !== CURRENT_USER_ID && Notification.permission === "granted") {
+        const notif = new Notification(senderName, {
+            body: parsed.text || "📷 Image",
+            icon: "/path/to/icon.png"
+        });
+        notif.onclick = () => {
+            window.focus();
+            selectUser(userId, senderName, "");
+            notif.close();
+        };
     }
 });
 
