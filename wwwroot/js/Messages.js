@@ -8,14 +8,6 @@ let selectedImageFile = null;
 let isSending = false;
 
 
-// Format a date string into a readable format
-function formatTime(dateStr) {
-    if (!dateStr) return "";
-    return new Date(dateStr).toLocaleString("en-IN", {
-        timeZone: IST_TIMEZONE
-    });
-}
-
 // Show an error message in console and alert
 function showError(msg, err) {
     console.error(msg, err);
@@ -94,23 +86,23 @@ async function loadMessages() {
         let lastDate = null;
 
         messages.forEach(message => {
-            const msgDate = new Date(
-                new Date(message.createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
-            ).toDateString();
+  
+            const msgDay = formatDateSeparator(message.createAt);
 
             // ✅ Date separator
-            if (msgDate !== lastDate) {
+            if (msgDay !== lastDate) {
                 const separator = document.createElement("div");
-                separator.dataset.msgDate = msgDate;
-                separator.textContent = formatDateSeparator(message.createAt);
+                separator.dataset.msgDate = msgDay;
+                separator.textContent = msgDay;
                 separator.style.textAlign = "center";
                 separator.style.color = "gray";
                 separator.style.margin = "10px 0";
                 separator.style.fontWeight = "bold";
                 container.appendChild(separator);
 
-                lastDate = msgDate; // ✅ FIXED
+                lastDate = msgDay;
             }
+
 
             // ✅ Render message
             renderMessage(container, message);
@@ -399,6 +391,7 @@ document.addEventListener("click", function (e) {
 
 
 //Receive Message
+// Receive Message
 connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt, receiver, messageId) => {
     let parsed;
     try {
@@ -414,31 +407,30 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         (senderId === SELECTED_USER_ID && receiverId === CURRENT_USER_ID) ||
         (senderId === CURRENT_USER_ID && receiverId === SELECTED_USER_ID);
 
-    const msgDate = new Date(
-        new Date(createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
-    ).toDateString();
+    // Convert message time to IST
+    const msgDay = formatDateSeparator(createAt);
 
+    // Date separator
+    const lastMsgDate = container.lastChild?.dataset?.msgDate;
+    if (msgDay !== lastMsgDate) {
+        const separator = document.createElement("div");
+        separator.dataset.msgDate = msgDay;
+        separator.textContent = msgDay;
+        separator.style.textAlign = "center";
+        separator.style.color = "gray";
+        separator.style.margin = "10px 0";
+        separator.style.fontWeight = "bold";
+        container.appendChild(separator);
+    }
+
+    // Render message if it's for current chat
     if (isCurrentChat) {
-        // Date separator
-        const lastMsgDate = container.lastChild?.dataset?.msgDate;
-        if (msgDate !== lastMsgDate) {
-            const separator = document.createElement("div");
-            separator.dataset.msgDate = msgDate;
-            separator.textContent = formatDateSeparator(createAt);
-            separator.style.textAlign = "center";
-            separator.style.color = "gray";
-            separator.style.margin = "10px 0";
-            container.appendChild(separator);
-        }
-
-        // Render message
         renderMessage(container, {
             id: messageId,
             senderId,
             message: JSON.stringify(parsed),
             createAt,
         });
-
         container.scrollTop = container.scrollHeight; // auto scroll
     }
 
@@ -449,9 +441,7 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
     const noChatsDiv = Array.from(chatList.children).find(
         el => el.innerText.trim() === "No chats yet"
     );
-    if (noChatsDiv) {
-        noChatsDiv.remove();
-    }
+    if (noChatsDiv) noChatsDiv.remove();
 
     if (!chatItem) {
         // NEW USER: create chat item
@@ -460,7 +450,7 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         chatItem.dataset.userId = userId;
         const displayName = senderId === CURRENT_USER_ID ? receiver.name : senderName;
         chatItem.dataset.userName = displayName;
-        chatItem.dataset.userEmail = ""; 
+        chatItem.dataset.userEmail = "";
         chatItem.innerHTML = `<strong>${displayName}</strong><span class="delete-chat"> 🗑️</span>`;
         chatList.insertBefore(chatItem, chatList.children[1]);
     }
@@ -478,8 +468,9 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
 
     // Browser notification for new message
     if (senderId !== CURRENT_USER_ID && Notification.permission === "granted") {
+        const notifBody = parsed.text || "📷 Image";
         const notif = new Notification(senderName, {
-            body: parsed.text || "📷 Image",
+            body: notifBody,
             icon: "/path/to/icon.png"
         });
         notif.onclick = () => {
@@ -489,8 +480,6 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         };
     }
 });
-
-
 
 
 
@@ -535,9 +524,7 @@ function formatMessageTime(dateStr) {
 
 function renderMessage(container, messageObj) {
 
-    const msgDate = new Date(
-        new Date(messageObj.createAt).toLocaleString("en-US", { timeZone: IST_TIMEZONE })
-    ).toDateString();
+    const msgDate = formatMessageTime(messageObj.createAt);
 
     const isCurrentUser = messageObj.senderId === CURRENT_USER_ID;
 
