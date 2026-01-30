@@ -3,7 +3,6 @@ const CURRENT_USER_ID = parseInt(document.getElementById("currentUserId").value,
 
 let SELECTED_USER_ID = null;
 let SELECTED_USER_NAME = null;
-const IST_TIMEZONE = "Asia/Kolkata";
 let selectedImageFile = null;
 let isSending = false;
 
