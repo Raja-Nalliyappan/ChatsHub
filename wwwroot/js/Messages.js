@@ -458,9 +458,10 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
         chatItem = document.createElement("div");
         chatItem.className = "chat-item mt-3";
         chatItem.dataset.userId = userId;
-        chatItem.dataset.userName = receiver.name; 
+        const displayName = senderId === CURRENT_USER_ID ? receiver.name : senderName;
+        chatItem.dataset.userName = displayName;
         chatItem.dataset.userEmail = ""; 
-        chatItem.innerHTML = `<strong>${receiver.name}</strong><span class="delete-chat"> 🗑️</span>`;
+        chatItem.innerHTML = `<strong>${displayName}</strong><span class="delete-chat"> 🗑️</span>`;
         chatList.insertBefore(chatItem, chatList.children[1]);
     }
 
