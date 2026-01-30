@@ -67,6 +67,7 @@ public class ChatsHubController : Controller
             .OrderBy(m => m.CreateAt)
             .Select(m => new
             {
+                id = m.Id,
                 m.SenderId,
                 m.ReceiverId,
                 Message = SafeDecrypt(encryption, m.Message), // ✅ decrypted JSON or text
@@ -187,6 +188,19 @@ public class ChatsHubController : Controller
 
         // ✅ Return proper JSON
         return Ok(new { image = "/chat-images/" + fileName });
+    }
+
+    [Authorize]
+    [HttpDelete("Chat/DeleteChatMessage")]
+    public IActionResult DeleteChatMessage(int receiverId, int id)
+    {
+        int currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        bool result = _usersRepository.DeleteChatMessage(currentUserId, receiverId, id);
+
+        return result
+            ? Ok(new { message = "Your chat deleted" })
+            : NotFound(new { message = "No messages found" });
     }
 
 }

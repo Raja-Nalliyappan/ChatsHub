@@ -47,39 +47,36 @@ public class ChatHub : Hub
         var senderId = GetUserId();
         var senderName = GetUserName();
 
-        if (!senderId.HasValue)
-            return;
-
+        if (!senderId.HasValue) return;
 
         var services = Context.GetHttpContext()!.RequestServices;
         var usersRepo = services.GetRequiredService<IUsersRepository>();
         var encryption = services.GetRequiredService<EncryptionService>();
 
-        // ✅ message is JSON (text + image)
         string encryptedMessage = encryption.Encrypt(message);
-
         var createdAt = DateTime.Now;
 
         var receiver = usersRepo.GetAllUsers()
                                 .FirstOrDefault(u => u.Id == receiverId);
 
-        // ✅ Save encrypted JSON in DB
-        usersRepo.InsertMessage(new Messages
+        // ✅ Save message and get the DB ID
+        int messageId = usersRepo.InsertMessage(new Messages
         {
             SenderId = senderId.Value,
             ReceiverId = receiverId,
-            Message = encryptedMessage,   // 🔐 encrypted JSON
+            Message = encryptedMessage,
             MessageReceiverName = receiver?.Name ?? "",
             CreateAt = createdAt
         });
 
-        // ✅ Send plain JSON to clients (NOT encrypted)
+        // ✅ Include the message ID when sending to clients
         await Clients.Group(receiverId.ToString())
-            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt, receiver);
+            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt, receiver, messageId);
 
         await Clients.Group(senderId.Value.ToString())
-            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt, receiver);
+            .SendAsync("ReceiveMessage", senderName, message, receiverId, senderId.Value, createdAt, receiver, messageId);
     }
+
 
 
 }

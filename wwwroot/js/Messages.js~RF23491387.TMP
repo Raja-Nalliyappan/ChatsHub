@@ -399,7 +399,7 @@ document.addEventListener("click", function (e) {
 
 
 //Receive Message
-connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt, receiver, messageId) => {
+connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt, receiver) => {
     let parsed;
     try {
         parsed = JSON.parse(message);
@@ -433,10 +433,10 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
 
         // Render message
         renderMessage(container, {
-            id: messageId,
+            id: Date.now(),
             senderId,
             message: JSON.stringify(parsed),
-            createAt,
+            createAt
         });
 
         container.scrollTop = container.scrollHeight; // auto scroll
@@ -581,16 +581,10 @@ function renderMessage(container, messageObj) {
     menuBtn.innerHTML = "⋮";
     menuBtn.style.position = "absolute";
     menuBtn.style.top = "3px";
+    menuBtn.style.right = "6px";
     menuBtn.style.cursor = "pointer";
     menuBtn.style.fontSize = "14px";
     menuBtn.style.color = isCurrentUser ? "#fff" : "#000";
-
-    if (isCurrentUser) {
-        menuBtn.style.right = "6px";
-    } else {
-        menuBtn.style.left = "6px"; 
-    }
-
 
     bubble.appendChild(menuBtn);
 
@@ -598,21 +592,15 @@ function renderMessage(container, messageObj) {
     const menu = document.createElement("div");
     menu.className = "msg-menu";
     menu.style.position = "absolute";
-    menu.style.top = "0px";
-    menu.style.backgroundColor = "white"; 
-    menu.style.color = "black";  
+    menu.style.top = "20px";
+    menu.style.right = "5px";
+    menu.style.background = "#fff";
     menu.style.border = "1px solid #ddd";
     menu.style.borderRadius = "6px";
     menu.style.padding = "5px";
     menu.style.display = "none";
     menu.style.zIndex = "1000";
     menu.style.minWidth = "120px";
-
-    if (isCurrentUser) {
-        menu.style.right = "60px";
-    } else {
-        menu.style.left = "60px"; 
-    }
 
     menu.innerHTML = `
         <div class="msg-option" data-action="copy">📋 Copy</div>
@@ -646,23 +634,18 @@ function renderMessage(container, messageObj) {
             if (!confirm("Delete this message?")) return;
 
             try {
-                const messageId = messageObj.id;
-                const receiverId = SELECTED_USER_ID;
+                const messageId = messageObj.id || messageObj.messageId || 0;
 
-                const response = await fetchWithAuth(
-                    `/ChatsHub/Chat/DeleteChatMessage?receiverId=${receiverId}&id=${messageId}`,
-                    { method: "DELETE" }
-                );
+                await fetchWithAuth(`/ChatsHub/DeleteMessage?id=${messageId}`, {
 
-                if (!response.ok) throw new Error("Delete failed");
+                    method: "DELETE"
+                });
 
                 msgDiv.remove();
             } catch (err) {
-                alert("Delete failed: " + (err.message || err));
-                console.error(err);
+                alert("Delete failed");
             }
         }
-
 
         menu.style.display = "none";
     });

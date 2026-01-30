@@ -2,7 +2,6 @@
 using ChatsHub.Models.DtoFiles;
 using ChatsHub.Repository.Interface;
 using Dapper;
-using Microsoft.Data.SqlClient;
 using Npgsql;
 using System.Data;
 
@@ -76,22 +75,21 @@ namespace ChatsHub.Repository
             return connection.QueryFirstOrDefault<Users>(loginUser, new { Email = email, PasswordHash = password });
         }
 
-        public void InsertMessage(Messages msg)
+        public int InsertMessage(Messages msg)
         {
             using var connection = CreateConnection();
 
-            connection.Execute(
-                "SELECT \"InsertMessage\"(@SenderId, @ReceiverId, @Message, @MessageReceiverName, @CreateAt)",
-                new
-                {
-                    SenderId = msg.SenderId,
-                    ReceiverId = msg.ReceiverId,
-                    Message = msg.Message,
-                    MessageReceiverName = msg.MessageReceiverName,
-                    CreateAt = msg.CreateAt
-                }
-            );
+            string sql = @"
+        INSERT INTO ""Messages"" (""SenderId"", ""ReceiverId"", ""Message"", ""MessageReceiverName"", ""CreateAt"")
+        VALUES (@SenderId, @ReceiverId, @Message, @MessageReceiverName, @CreateAt)
+        RETURNING ""Id"";
+    ";
+
+            return connection.ExecuteScalar<int>(sql, msg);
         }
+
+
+
 
 
         // Repository method returning DTO
@@ -123,6 +121,27 @@ namespace ChatsHub.Repository
             );
 
             return users.ToList();
+        }
+
+        public bool DeleteChatMessage(int senderId, int receiverId, int id)
+        {
+            using var connection = CreateConnection();
+
+            string sql = @"
+        DELETE FROM ""Messages""
+        WHERE ""Id"" = @Id
+          AND ""SenderId"" = @SenderId
+          AND ""ReceiverId"" = @ReceiverId
+    ";
+
+            int rows = connection.Execute(sql, new
+            {
+                Id = id,           // primary key of the message
+                SenderId = senderId,
+                ReceiverId = receiverId
+            });
+
+            return rows > 0;
         }
 
     }

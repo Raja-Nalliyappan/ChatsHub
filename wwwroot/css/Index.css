@@ -191,9 +191,9 @@
 /* Image preview container - big and centered */
 .image-preview {
     display: flex;
-    justify-content: center; /* center horizontally */
-    align-items: center; /* center vertically */
-    max-height: 250px; /* big preview */
+    justify-content: center; 
+    align-items: center; 
+    max-height: 250px; 
     width: 100%;
     overflow: hidden;
     border: 1px solid #ccc;
@@ -202,22 +202,19 @@
     background-color: #f9f9f9;
 }
 
-    /* Image inside preview */
-    .image-preview img {
-        max-height: 240px; /* make image big */
-        max-width: 100%;
-        object-fit: contain; /* keep aspect ratio */
-        border-radius: 6px;
-    }
+.image-preview img {
+    max-height: 240px; 
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+}
 
-/* Input row layout */
 .input-row {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* Message input */
 #messageInput {
     flex: 1;
     height: 55px;
@@ -227,3 +224,17 @@
     resize: none;
     border: 1px solid #ccc;
 }
+
+.msg-option {
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.msg-option:hover {
+    background: #f3f2f1;
+}
+
+

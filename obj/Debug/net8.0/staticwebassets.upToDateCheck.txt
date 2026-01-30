@@ -15,6 +15,8 @@ wwwroot\chat-images\9b0911eb-453b-4cee-a246-9521144fa775.png
 wwwroot\chat-images\a54c6e11-5a6b-4cd9-abc4-dec2e516cc4e.png
 wwwroot\chat-images\a6c8d22b-29d4-45e0-8709-40b6a3650237.png
 wwwroot\chat-images\a96c183c-4fb1-4e99-af63-73561dc993af.png
+wwwroot\chat-images\b37f6ab5-28be-4af4-8543-45531ace0d5d.png
+wwwroot\chat-images\b80fad6b-a7bc-4aea-8745-ab1e236a8d71.png
 wwwroot\chat-images\c2e72994-3006-412d-904a-53d7004135cb.png
 wwwroot\chat-images\c3449c3a-f9b4-4453-9853-ddde4ccad730.png
 wwwroot\chat-images\c375b2da-5ab4-4baa-99a6-8566e4d7ccef.png
@@ -38,6 +40,7 @@ wwwroot\js\Common.js
 wwwroot\js\Login.js
 wwwroot\js\Messages.js
 wwwroot\js\Messages.js~RF1f2f9d4c.TMP
+wwwroot\js\Messages.js~RF23491387.TMP
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
