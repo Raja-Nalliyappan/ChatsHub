@@ -253,9 +253,8 @@ connection.start()
 
 
 
-// ✅ SEND MESSAGE (TEXT + IMAGE)
+// ✅ SEND MESSAGE 
 async function sendMessage() {
-    showLoader();
     if (isSending) return;
 
     const input = document.getElementById("messageInput");
@@ -326,15 +325,10 @@ async function sendMessage() {
         document.getElementById("sendBtn").disabled = false;
         const preview = document.getElementById("imagePreview");
         preview.innerHTML = "";
-        hideLoader();
+        preview.style.display = "none"
     }
 }
 
-
-
-
-
-// Event listeners
 
 // Handle chat item clicks
 document.addEventListener("click", (e) => {
@@ -737,6 +731,7 @@ document.getElementById("messageInput").addEventListener("paste", function (even
 // Function to display image preview
 function showImagePreview(file) {
     const preview = document.getElementById("imagePreview");
+    preview.style.display = "flex"
     preview.innerHTML = "";
 
     if (!file) return;
