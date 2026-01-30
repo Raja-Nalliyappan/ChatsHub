@@ -446,6 +446,13 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
     const userId = senderId === CURRENT_USER_ID ? receiverId : senderId;
     let chatItem = chatList.querySelector(`.chat-item[data-user-id="${userId}"]`);
 
+    const noChatsDiv = Array.from(chatList.children).find(
+        el => el.innerText.trim() === "No chats yet"
+    );
+    if (noChatsDiv) {
+        noChatsDiv.remove();
+    }
+
     if (!chatItem) {
         // NEW USER: create chat item
         chatItem = document.createElement("div");

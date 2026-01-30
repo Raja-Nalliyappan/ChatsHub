@@ -63,8 +63,29 @@ namespace ChatsHub.Repository
         {
             using var connection = CreateConnection();
 
-            return connection.Query<Messages>("SELECT * FROM \"GetMessages\"(@CurrentUserId, @OtherUserId)", new { CurrentUserId = currentUserId, OtherUserId = otherUserId }).ToList();
+            string sql = @"
+        SELECT 
+            ""Id"",
+            ""SenderId"",
+            ""ReceiverId"",
+            ""Message"",
+            ""MessageReceiverName"",
+            ""CreateAt""
+        FROM ""Messages""
+        WHERE 
+            (""SenderId"" = @CurrentUserId AND ""ReceiverId"" = @OtherUserId)
+            OR
+            (""SenderId"" = @OtherUserId AND ""ReceiverId"" = @CurrentUserId)
+        ORDER BY ""CreateAt"";
+    ";
+
+            return connection.Query<Messages>(sql, new
+            {
+                CurrentUserId = currentUserId,
+                OtherUserId = otherUserId
+            }).ToList();
         }
+
 
         public Users GetNameAndPassword(string email, string password)
         {
