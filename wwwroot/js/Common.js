@@ -1,14 +1,43 @@
 ﻿//Time Format
-function formatMessageTime(dateStr) {
-    if (!dateStr) return "";
+const IST_TIMEZONE = "Asia/Kolkata";
 
-    return new Date(dateStr).toLocaleTimeString("en-IN", {
-        timeZone: "Asia/Kolkata", 
+// Format time of a message in IST
+function formatMessageTime(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString("en-IN", {
+        timeZone: IST_TIMEZONE,
         hour: "2-digit",
         minute: "2-digit",
         hour12: true
     }).toUpperCase();
 }
+
+// Format date separators like Today / Yesterday / 30 Jan 2026 in IST
+function formatDateSeparator(dateStr) {
+    const date = new Date(dateStr);
+
+    const now = new Date();
+    const istNow = new Date(now.toLocaleString("en-US", { timeZone: IST_TIMEZONE }));
+
+    const istYesterday = new Date(istNow);
+    istYesterday.setDate(istNow.getDate() - 1);
+
+    const msgDateStr = date.toLocaleDateString("en-IN", { timeZone: IST_TIMEZONE });
+    const todayStr = istNow.toLocaleDateString("en-IN");
+    const yesterdayStr = istYesterday.toLocaleDateString("en-IN");
+
+    if (msgDateStr === todayStr) return "Today";
+    if (msgDateStr === yesterdayStr) return "Yesterday";
+
+    return date.toLocaleDateString("en-IN", {
+        timeZone: IST_TIMEZONE,
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+}
+
+
 
 
 
