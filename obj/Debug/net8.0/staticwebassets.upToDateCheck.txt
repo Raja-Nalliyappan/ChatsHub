@@ -38,7 +38,6 @@ wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\js\Common.js
 wwwroot\js\Login.js
-wwwroot\js\Messages.js
 wwwroot\js\Messages.js~RF1f2f9d4c.TMP
 wwwroot\js\Messages.js~RF23491387.TMP
 wwwroot\js\site.js
@@ -99,3 +98,4 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\js\Messages.js

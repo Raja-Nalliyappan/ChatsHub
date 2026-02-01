@@ -193,7 +193,7 @@ async function sendMessage() {
     if (isSending) return;
 
     const input = document.getElementById("messageInput");
-    const textMessage = input.value.trim();
+    const textMessage = input.value;
 
     if (!textMessage && !selectedImageFile) {
         alert("Type a message or select an image");
@@ -277,9 +277,8 @@ document.addEventListener("click", (e) => {
 document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
 // Handle Enter key in message input
-document.getElementById("messageInput").addEventListener("keypress", (e) => {
+document.getElementById("messageInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
         sendMessage();
     }
 });
@@ -387,9 +386,6 @@ document.addEventListener("click", function (e) {
 
 
 
-
-
-//Receive Message
 // Receive Message
 connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, createAt, receiver, messageId) => {
     let parsed;
@@ -530,6 +526,7 @@ function renderMessage(container, messageObj) {
     // Text
     if (data.text) {
         const text = document.createElement("div");
+        text.className = "chat-message-text";
         text.textContent = data.text;
         bubble.appendChild(text);
     }
