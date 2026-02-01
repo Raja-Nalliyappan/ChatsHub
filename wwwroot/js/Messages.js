@@ -410,7 +410,10 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
     const msgDay = formatDateSeparator(createAt);
 
     // Date separator
-    const lastMsgDate = container.lastChild?.dataset?.msgDate;
+    const lastSeparator = Array.from(container.children)
+        .reverse()
+        .find(el => el.dataset?.msgDate);
+    const lastMsgDate = lastSeparator?.dataset?.msgDate;
     if (msgDay !== lastMsgDate) {
         const separator = document.createElement("div");
         separator.dataset.msgDate = msgDay;
@@ -483,44 +486,6 @@ connection.on("ReceiveMessage", (senderName, message, receiverId, senderId, crea
 
 
 
-
-//common dates Showing
-function formatDateSeparator(dateStr) {
-    const date = new Date(dateStr);
-
-    const now = new Date();
-    const istDate = new Date(now.toLocaleString("en-US", { timeZone: IST_TIMEZONE }));
-    const istYesterday = new Date(istDate);
-    istYesterday.setDate(istDate.getDate() - 1);
-
-    const msgDateStr = date.toLocaleDateString("en-IN", { timeZone: IST_TIMEZONE });
-    const todayStr = istDate.toLocaleDateString("en-IN");
-    const yesterdayStr = istYesterday.toLocaleDateString("en-IN");
-
-    if (msgDateStr === todayStr) return "Today";
-    if (msgDateStr === yesterdayStr) return "Yesterday";
-
-    return date.toLocaleDateString("en-IN", {
-        timeZone: IST_TIMEZONE,
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-    });
-}
-
-
-function formatMessageTime(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString("en-IN", {
-        timeZone: IST_TIMEZONE,
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-    }).toUpperCase();
-}
-
-
-
 function renderMessage(container, messageObj) {
 
     const msgDate = formatMessageTime(messageObj.createAt);
@@ -528,7 +493,6 @@ function renderMessage(container, messageObj) {
     const isCurrentUser = messageObj.senderId === CURRENT_USER_ID;
 
     const msgDiv = document.createElement("div");
-    msgDiv.dataset.msgDate = msgDate;
     msgDiv.style.display = "flex";
     msgDiv.style.justifyContent = isCurrentUser ? "flex-end" : "flex-start";
     msgDiv.style.position = "relative";

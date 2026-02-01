@@ -54,7 +54,7 @@ public class ChatHub : Hub
         var encryption = services.GetRequiredService<EncryptionService>();
 
         string encryptedMessage = encryption.Encrypt(message);
-        var createdAt = DateTime.Now;
+        var createdAt = DateTime.UtcNow;
 
         var receiver = usersRepo.GetAllUsers()
                                 .FirstOrDefault(u => u.Id == receiverId);

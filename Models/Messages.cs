@@ -9,6 +9,6 @@ namespace ChatsHub.Models
         public int ReceiverId { get; set; }
         public string MessageReceiverName { get; set; }
         public string Message { get; set; }
-        public DateTime CreateAt { get; set; }
+        public DateTimeOffset CreateAt { get; set; }
     }
 }

@@ -9,41 +9,41 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ChatsHub
 build_property.RootNamespace = ChatsHub
-build_property.ProjectDir = \\eainns002\userprofilesxb$\eespl574\Desktop\ChatsHub\
+build_property.ProjectDir = R:\Edgar ChatsHub\Edgar\ChatsHub\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = \\eainns002\userprofilesxb$\eespl574\Desktop\ChatsHub
+build_property.MSBuildProjectDirectory = R:\Edgar ChatsHub\Edgar\ChatsHub
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/ChatsHub/Index.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/ChatsHub/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdHNIdWJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/ChatsHub/LoginPage.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/ChatsHub/LoginPage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdHNIdWJcTG9naW5QYWdlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/Shared/Error.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/Shared/_ValidationScriptsPartial.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/_ViewImports.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/_ViewStart.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[//eainns002/userprofilesxb$/eespl574/Desktop/ChatsHub/Views/Shared/_Layout.cshtml]
+[R:/Edgar ChatsHub/Edgar/ChatsHub/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-woiku02k2b

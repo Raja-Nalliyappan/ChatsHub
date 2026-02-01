@@ -1,7 +1,6 @@
-﻿//Time Format
+﻿// Timezone constant
 const IST_TIMEZONE = "Asia/Kolkata";
 
-// Format time of a message in IST
 function formatMessageTime(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleTimeString("en-IN", {
@@ -12,25 +11,20 @@ function formatMessageTime(dateStr) {
     }).toUpperCase();
 }
 
-// Format date separators like Today / Yesterday / 30 Jan 2026 in IST
 function formatDateSeparator(dateStr) {
-    const date = new Date(dateStr);
+    const msgIST = new Date(new Date(dateStr).toLocaleString("en-US", { timeZone: IST_TIMEZONE }));
+    const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: IST_TIMEZONE }));
+    const msgDayStr = msgIST.toISOString().split("T")[0];
+    const todayStr = nowIST.toISOString().split("T")[0];
 
-    const now = new Date();
-    const istNow = new Date(now.toLocaleString("en-US", { timeZone: IST_TIMEZONE }));
+    const yesterdayIST = new Date(nowIST);
+    yesterdayIST.setDate(nowIST.getDate() - 1);
+    const yesterdayStr = yesterdayIST.toISOString().split("T")[0];
 
-    const istYesterday = new Date(istNow);
-    istYesterday.setDate(istNow.getDate() - 1);
+    if (msgDayStr === todayStr) return "Today";
+    if (msgDayStr === yesterdayStr) return "Yesterday";
 
-    const msgDateStr = date.toLocaleDateString("en-IN", { timeZone: IST_TIMEZONE });
-    const todayStr = istNow.toLocaleDateString("en-IN");
-    const yesterdayStr = istYesterday.toLocaleDateString("en-IN");
-
-    if (msgDateStr === todayStr) return "Today";
-    if (msgDateStr === yesterdayStr) return "Yesterday";
-
-    return date.toLocaleDateString("en-IN", {
-        timeZone: IST_TIMEZONE,
+    return msgIST.toLocaleDateString("en-IN", {
         month: "short",
         day: "numeric",
         year: "numeric"
